@@ -1,0 +1,85 @@
+
+.description {
+  color: gray;
+  font-size: 11px;
+  width:100%;
+
+ 
+}
+
+.unit{
+  display: inline-block;
+  width: 60px; /* Adjust the width as needed */
+  text-align: left;
+  margin-left: 10px;
+  font-size: 13px;
+  color: gray;
+}
+
+.el-select {
+  width: 120px;
+}
+.el-card__header{
+  padding: 5px 20px;
+}
+
+.el-card__body {
+  padding-bottom: 5px;
+  padding-top: 10px;
+ 
+}
+
+.el-form-item  {
+  margin-bottom: 0px;
+  
+}
+
+.card-header span {
+  font-size: .9em;
+
+}
+
+.el-form-item__label{
+  font-size: .8em;
+
+}
+
+.el-form-item__content {
+  font-size: .9em;
+  margin-left: 0px;;
+}
+
+.el-alert__title.with-description{
+  font-size: .8em;
+}
+
+.el-alert .el-alert__description {
+  font-size: .7em;
+}
+
+.el-card, .el-table{
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.el-table .el-table__cell {
+  padding: 2px;
+  font-size: 0.9em;
+
+}
+
+.el-table .cell  {
+  line-height: 18px;
+}
+
+.no-plot {
+
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+border-radius: 5px;
+border: 1px solid #ebeef5;
+color: darkgray;
+margin: 10px 0;
+}

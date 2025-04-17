@@ -1,0 +1,44 @@
+DATABASE /usr/local/share/doc/phreeqc/database/pitzer.dat
+SOLUTION 1
+	temp	25.0
+	pH	7.0
+	units	mol/kgw
+	Na	0
+	Cl	0
+	Ca	0
+	Mg	0
+	K	0
+	S(6)	0
+	C 0 as HCO3
+GAS_PHASE 1
+	-fixed_pressure
+	-pressure 9.6718454
+	-volume 1.0
+	 CO2(g) 9.18825313
+	H2O(g) 0.48359227000000005
+
+USER_PUNCH
+    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC
+    -start
+    10 PUNCH VM("Na+")
+    20 PUNCH VM("Cl-")
+    30 PUNCH VM("K+")
+    40 PUNCH VM("Ca+2")
+    50 PUNCH VM("Mg+2")
+    60 PUNCH VM("SO4-2")
+    70 PUNCH VM("HCO3-")
+    80 PUNCH VM("CO3-2")
+    90 PUNCH RHO
+    100 PUNCH OSMOTIC
+    -end
+
+SELECTED_OUTPUT
+    -file ./solution_properties.tsv
+    -totals C(4)
+    -solution True
+    -gases CO2(g)
+    -saturation_indices CO2(g)
+    -activities   Na+ K+ Cl- SO4+2 Ca+2 Mg+2 HCO3- CO3-2
+    -ionic_strength True
+    -calculate_values
+END
