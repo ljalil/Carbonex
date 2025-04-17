@@ -104,9 +104,9 @@ export async function runSimulation() {
       activity_of_water: 0,
       osmotic_coefficient: 0,
       speciesData: [],
-      plotData: [],
-      error: "Failed to run simulation" 
+      plotData: []
     };
+    console.error("Failed to run simulation");
   }
 }
 
@@ -146,8 +146,8 @@ export async function runSimulationWithVaryingPressure() {
     console.error("Error during varying pressure simulation:", error);
     store.simulationOutput = {
       ...store.simulationOutput,
-      plotData: [],
-      error: "Failed to run varying pressure simulation"
+      plotData: []
     };
+    console.error("Failed to run varying pressure simulation");
   }
 }

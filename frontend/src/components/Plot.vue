@@ -13,7 +13,8 @@ import { LineChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
 
-import { defineComponent, provide, computed, PropType } from 'vue';
+import { defineComponent, provide, computed } from 'vue';
+import type { PropType } from 'vue';
 import { progressProps } from 'element-plus';
 
 // Register required components for ECharts

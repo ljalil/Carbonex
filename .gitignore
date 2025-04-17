@@ -41,3 +41,7 @@ dist/
 htmlcov/
 .tox/
 docs/_build/
+
+*.pqi
+*.pqo
+*.tsv

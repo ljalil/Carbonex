@@ -109,8 +109,6 @@
     Share,
     Upload,
   } from "@element-plus/icons-vue";
-  import { createTracing } from "trace_events";
-  
 
   interface UnitOption {
     label: string;

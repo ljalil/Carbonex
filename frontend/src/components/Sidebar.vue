@@ -103,7 +103,7 @@
     </el-form>
   </el-card>
 
-  <el-card class="operational-card" shadow="neverhover">
+  <el-card class="operational-card">
     <template #header>
       <div class="card-header">
         <span>Operational variables</span>
@@ -161,7 +161,9 @@ export default defineComponent({
     ElInputNumber,
   },
   setup() {
-const ions = [
+// Define a type for ion names to match the keys in concentrations
+type IonName = "Na+" | "K+" | "Cl-" | "Mg+2" | "Ca+2" | "SO4-2" | "HCO3-" | "CO3-2";
+const ions: IonName[] = [
       "Na+",
       "K+",
       "Cl-",
@@ -225,13 +227,20 @@ const ions = [
       unitConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit)
     );
     
-    const handleTemperatureChange = (value: number) => {
-      // Convert from the displayed unit to Kelvin for storage
+    const handleTemperatureChange = (
+      current: number | undefined,
+      previous: number | undefined
+    ) => {
+      // Convert from the displayed unit to Kelvin for storage, default to 0 if undefined
+      const value = current ?? 0;
       store.simulationInput.temperature = unitConversion.toKelvin(
         value,
         store.unitPreferences.temperatureUnit
       );
     };
+
+
+    
 
     const updateTemperatureUnit = () => {
       // When unit changes, update displayed temperature
@@ -264,13 +273,13 @@ const ions = [
       unitConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit)
     );
     
-    const handlePressureChange = (value: number) => {
-      // Convert from the displayed unit to MPa for storage
-      store.simulationInput.pressure = unitConversion.toMPa(
-        value,
-        store.unitPreferences.pressureUnit
-      );
-    };
+    const handlePressureChange = (new_value: number | undefined, old_value: number | undefined) => {
+          // Convert from the displayed unit to MPa for storage
+          store.simulationInput.pressure = unitConversion.toMPa(
+            new_value ?? 0,
+            store.unitPreferences.pressureUnit
+          );
+        };
 
     const updatePressureUnit = () => {
       // When unit changes, update displayed pressure
