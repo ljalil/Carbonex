@@ -45,3 +45,4 @@ docs/_build/
 *.pqi
 *.pqo
 *.tsv
+*.inp
