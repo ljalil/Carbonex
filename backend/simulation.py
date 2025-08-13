@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import subprocess
 import csv
+import DuanSun2006
+import sys
 
 def get_solution_properties(temperature, pressure, species):
     temp_files_path = '.'
@@ -125,7 +127,7 @@ END'''
     
     return species_data, density, ionic_strength, ph, activity_of_water, osmotic_coefficient
 
-def simulate_varying_pressure(temperature, ion_moles, database="pitzer", print_code=False):
+def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
     database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'
     temp_files_path = "."
 
@@ -150,8 +152,7 @@ def simulate_varying_pressure(temperature, ion_moles, database="pitzer", print_c
     phreeqc_code += f'SELECTED_OUTPUT\n\t-file {os.path.join(temp_files_path, "varying_pressure.tsv")}\n\t-totals\tC(4)\n\t-solution True\n\t-gases\tCO2(g)\n\t-saturation_indices CO2(g)\nEND\n'
 
     filename = 'varying_pressure.pqi'
-    if print_code:
-        print(phreeqc_code)
+
     pqi = open(os.path.join(temp_files_path, filename), 'w')
     pqi.write(phreeqc_code)
 
@@ -178,6 +179,9 @@ def simulate_varying_pressure(temperature, ion_moles, database="pitzer", print_c
             result['Pressure (MPa)'].append(pressure)
             result['Dissolved CO2 (mol/kg)'].append(dissolved_co2)
 
+    #print('phreeqc pressures' ,result['Pressure (MPa)'], file=sys.stdout, flush=True)
+    #print('phreeqc solubilities' ,result['Dissolved CO2 (mol/kg)'], file=sys.stdout, flush=True)
+
     if os.path.exists("error.inp"):
         os.remove("error.inp")
         
@@ -186,7 +190,48 @@ def simulate_varying_pressure(temperature, ion_moles, database="pitzer", print_c
 
     return result
 
-def run_state_simulation(temperature, pressure, species):
+def _simulate_varying_pressure_Carbonex(temperature, ion_moles):
+    return {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
+
+    
+def _simulate_varying_pressure_DuanSun(temperature, ion_moles):
+    """
+    Use Duan and Sun (2006) model to calculate CO2 solubility over a pressure range.
+    Returns dict with lists for 'Pressure (MPa)' and 'Dissolved CO2 (mol/kg)'.
+    """
+    print('from _simulate_varying_pressure_DuanSun', flush=True)
+    model = DuanSun2006.DuanSun2006()
+    # Define pressure range: start, end, step (MPa)
+    P_start = 0.1
+    P_end = 50.0
+    P_step = 1
+    result = model.calculate_varying_pressure(P_start, P_end, P_step, temperature, ion_moles, model="DuanSun")
+    return result
+
+def simulate_varying_pressure(temperature, ion_moles, model):
+    #print(f'running varying pressure simulation with {model}')
+    if model == 'phreeqc_phreeqc':
+        result = _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database='phreeqc')
+        #print('phreeqc results' ,result, file=sys.stdout, flush=True)
+    elif model == 'phreeqc_pitzer':
+        result = _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database='pitzer')
+        #print('phreeqc results' ,result, file=sys.stdout, flush=True)
+    elif model == 'duan_sun_2006':
+        print('using duan sun model', flush=True)
+        result = _simulate_varying_pressure_DuanSun(temperature, ion_moles)
+        #print('duan sun results', result, file=sys.stdout, flush=True)
+
+    elif model == 'carbonex':
+        results = _simulate_varying_pressure_Carbonex(temperature, ion_moles)
+    else:
+        # Default to empty result for unknown models
+        result = {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
+        
+    
+    return result
+    
+
+def _run_PHREEQC_state_simulation(temperature, pressure, species, database):
     temp_files_path = '.'
     Na = species.get('Na+', 0)
     Cl = species.get('Cl-', 0)
@@ -205,7 +250,7 @@ def run_state_simulation(temperature, pressure, species):
     # Define the output file path consistently
     state_out_file = os.path.join(temp_files_path, "state_out.tsv")
 
-    phreeqc_code = f'DATABASE /usr/local/share/doc/phreeqc/database/pitzer.dat\n'
+    phreeqc_code = f'DATABASE /usr/local/share/doc/phreeqc/database/{database}.dat\n'
     phreeqc_code += f'SOLUTION 1\n\ttemp\t{temperature_c}\n\tpH\t7.0\n\t'
     phreeqc_code += f'units\tmol/kgw\n\tNa\t{Na}\n\tCl\t{Cl}\n\tCa\t{Ca}\n\tMg\t{Mg}\n\tK\t{K}\n\tS(6)\t{SO4}\n\tC {HCO3} as HCO3\n'
     phreeqc_code += f'GAS_PHASE 1\n\t-fixed_pressure\n\t-pressure {pressure_atm}\n'
@@ -266,7 +311,7 @@ END'''
                 # Get the last row (final simulation state)
                 for row in reader:
                     results = row  # Will keep the last row
-                    print(results)
+                    #print(results)
             
     except Exception as e:
         print(f"Error reading {state_out_file}: {str(e)}")
@@ -278,12 +323,31 @@ END'''
     except (ValueError, TypeError):
         dissolved_co2 = 0
 
-    print('Dissolved CO2 concentration:', dissolved_co2)
-    
     return dissolved_co2
 
-if __name__ == '__main__':
-    # Testing code for the new function
-    dissolved_co2 = run_state_simulation(temperature=298, pressure=1, species={'Na+': 0.1, 'Cl-': 0.1, 'Mg+2': 0, 'Ca+2': 0, 'K+': 0, 'SO4-2': 0, 'HCO3-': 0, 'CO3-2': 0})
-    print(f'Dissolved CO2: {dissolved_co2} mol/kg')
+def _run_Duan_Sun_state_simulation(temperature, pressure, species):
+    # Use Duan and Sun (2006) model to calculate dissolved CO2
+    model = DuanSun2006.DuanSun2006()
+    try:
+        # calculate_CO2_solubility expects P in MPa, T in Kelvin, ion molalities dict
+        dissolved_co2 = model.calculate_CO2_solubility(
+            pressure, temperature, species, model="DuanSun"
+        )
+    except Exception:
+        dissolved_co2 = 0
+    return dissolved_co2
+
+def run_state_simulation(temperature, pressure, species, model):
+    if model == 'phreeqc_phreeqc':
+        dissolved_co2 = _run_PHREEQC_state_simulation(temperature, pressure, species, database='phreeqc')
+    elif model == 'phreeqc_pitzer':
+        dissolved_co2 = _run_PHREEQC_state_simulation(temperature, pressure, species, database='pitzer')
+
+    elif model == 'duan_sun_2006':
+        dissolved_co2 = _run_Duan_Sun_state_simulation(temperature, pressure, species)
+
+    elif model == 'carbonex':
+        dissolved_co2 = 3
+
+    return dissolved_co2
 

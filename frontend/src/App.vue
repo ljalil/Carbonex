@@ -17,7 +17,7 @@
 
 
             <ActionBar></ActionBar>
-            <Plot :data="simulationOutput.plotData"></Plot>
+            <Plot :data="store.simulationOutput.plotData"></Plot>
 
         </el-col>
         <el-col :span="5">

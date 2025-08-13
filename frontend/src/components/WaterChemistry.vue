@@ -1,39 +1,174 @@
 <template>
-  <div class="sidebar-container">
-    <h2>Water Chemistry</h2>
-    <p class="description">Choose water composition from a predefined preset, or specify ionic species concentration and pH manually.</p>
-    <div v-for="ion in ions" :key="ion.name">
-      <label>
-        <span class="input-name" v-html="ion.displayName"></span>
-        <input type="number" v-model="ion.concentration" :placeholder="`${ion.name} concentration`">
-        <span class="unit" v-html="unit"></span>
-      </label>
-    </div>
-  </div>
+  <el-card class="concentration-card" shadow="never">
+    <template #header>
+      <div class="card-header">
+        <span>Aqueous species</span>
+      </div>
+    </template>
+
+    <el-form label-position="left">
+      <el-form-item label="Preset">
+        <el-select
+          size="small"
+          v-model="store.simulationInput.preset"
+          placeholder="Select option"
+          @change="updateWaterPreset"
+        >
+          <el-option
+            v-for="option in presetOptions"
+            :key="option"
+            :label="option"
+            :value="option"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item v-for="ion in ions" :key="ion">
+        <span v-html="formatIonName(ion)" class="ion-label"></span>
+        <el-input-number
+          v-model="store.simulationInput.concentrations[ion]"
+          size="small"
+          :min="0"
+          :precision="4"
+          :step="0.1"
+          @change="calculateChargeBalance"
+        />
+        <span class="unit-label">mol/kg</span>
+      </el-form-item>
+    </el-form>
+    <el-alert v-if="!isChargeBalanced" title="Charge imbalance" center show-icon type="error" :closable="false" />
+    <el-alert v-else title="Charge balanced" center show-icon type="success" :closable="false" />
+  </el-card>
 </template>
 
-<script>
-export default {
-  name: 'WaterChemistry',
-  data() {
-    return {
-      unit: 'mg/L',
-      ions: [
-        { name: 'Na+', displayName: 'Na<sup>+</sup>', concentration: 0 },
-        { name: 'K+', displayName: 'K<sup>+</sup>', concentration: 0 },
-        { name: 'Mg2+', displayName: 'Mg<sup>2+</sup>', concentration: 0 },
-        { name: 'Ca2+', displayName: 'Ca<sup>2+</sup>', concentration: 0 },
-        { name: 'Cl-', displayName: 'Cl<sup>-</sup>', concentration: 0 },
-        { name: 'SO42-', displayName: 'SO<sub>4</sub><sup>2-</sup>', concentration: 0 },
-        { name: 'HCO3-', displayName: 'HCO<sub>3</sub><sup>-</sup>', concentration: 0 },
-        // Add more ions as needed
-      ]
-    }
-  }
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import { store } from "../store";
+import {
+  ElCard,
+  ElForm,
+  ElFormItem,
+  ElSelect,
+  ElOption,
+  ElInputNumber,
+  ElAlert,
+} from "element-plus";
 
-}
+export default defineComponent({
+  name: "WaterChemistry",
+  components: {
+    ElCard,
+    ElForm,
+    ElFormItem,
+    ElSelect,
+    ElOption,
+    ElInputNumber,
+    ElAlert,
+  },
+  setup() {
+    // Define a type for ion names to match the keys in concentrations
+    type IonName = "Na+" | "K+" | "Cl-" | "Mg+2" | "Ca+2" | "SO4-2" | "HCO3-" | "CO3-2";
+    
+    const ions: IonName[] = [
+      "Na+",
+      "K+",
+      "Cl-",
+      "Mg+2",
+      "Ca+2",
+      "SO4-2",
+    ];
+
+    const ionCharges: Record<IonName, number> = {
+      "Na+": 1,
+      "K+": 1,
+      "Cl-": -1,
+      "Mg+2": 2,
+      "Ca+2": 2,
+      "SO4-2": -2,
+      "HCO3-": -1,
+      "CO3-2": -2,
+    };
+
+    const presetOptions = ['Seawater', 'Freshwater', 'Brackish water'];
+
+    const isChargeBalanced = ref(true);
+
+    const calculateChargeBalance = () => {
+      let totalCharge = 0;
+      for (const ion of ions) {
+        totalCharge += store.simulationInput.concentrations[ion] * ionCharges[ion];
+      }
+      // You might want to define a tolerance for what you consider "balanced"
+      isChargeBalanced.value = Math.abs(totalCharge) < 0.0001;
+    };
+    
+    // Direct mapping of ion names to their HTML representation
+    const ionNameMapping: Record<string, string> = {
+      "Na+": "Na<sup>+</sup>",
+      "K+": "K<sup>+</sup>",
+      "Cl-": "Cl<sup>-</sup>",
+      "Mg+2": "Mg<sup>+2</sup>",
+      "Ca+2": "Ca<sup>+2</sup>",
+      "SO4-2": "SO<sub>4</sub><sup>-2</sup>",
+      "HCO3-": "HCO<sub>3</sub><sup>-</sup>",
+      "CO3-2": "CO<sub>3</sub><sup>-2</sup>"
+    };
+    
+    // Simple function to look up the formatted ion name
+    const formatIonName = (ion: string) => {
+      return ionNameMapping[ion] || ion; // Return mapped value or original if not found
+    };
+    
+    // Water preset handling
+    const updateWaterPreset = (preset: string) => {
+      console.log("Updating water preset to:", preset);
+      
+      if (preset === "Seawater") {
+        // Update concentrations with seawater values
+        store.simulationInput.concentrations["Na+"] = 0.4791;
+        store.simulationInput.concentrations["K+"] = 0.009796;
+        store.simulationInput.concentrations["Ca+2"] = 0.011478;
+        store.simulationInput.concentrations["Mg+2"] = 0.026167;
+        store.simulationInput.concentrations["Cl-"] = 0.5134;
+        store.simulationInput.concentrations["SO4-2"] = 0.02021;
+      }
+      // We only have seawater preset for now, can add others later
+      calculateChargeBalance();
+    };
+
+    return {
+      store,
+      ions,
+      presetOptions,
+      formatIonName,
+      calculateChargeBalance,
+      isChargeBalanced,
+      updateWaterPreset,
+    };
+  },
+});
 </script>
 
 <style scoped>
+.concentration-card {
+  width: 100%;
+}
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+}
+
+.unit-label {
+  margin-left: 10px;
+}
+
+.ion-label {
+  display: inline-block;
+  width: 65px;
+  margin-right: 5px;
+  text-align: left;
+}
 </style>

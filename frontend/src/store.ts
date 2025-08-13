@@ -31,7 +31,7 @@ interface SimulationOutput {
 // Define available unit types
 export type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
 export type PressureUnit = 'bar' | 'atm' | 'psi' | 'mpa';
-export type ModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun' | 'carbonex';
+export type ModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
 
 interface SimulationInput {
   temperature: number; // Always stored in Kelvin (backend compatible)

@@ -50,15 +50,18 @@ def solution_properties():
 
 
 @app.route('/run_simulation_with_varying_pressure', methods=['POST'])
-def run_simulation_with_varying_pressure(model = 'PHREEQC'):
+def run_simulation_with_varying_pressure():
     try:
         data = request.json
 
         temperature = data.get('temperature')
         concentrations = data.get('concentrations')
+        model = data.get('model')
+        print('running simulation with varying pressure, model', model,flush=True)
         
         # Call the simulate_varying_pressure function
-        result = simulate_varying_pressure(temperature=temperature, ion_moles=concentrations)
+        result = simulate_varying_pressure(temperature=temperature, ion_moles=concentrations, model=model)
+        #print('returned results', result,flush=True)
         
         # Convert the result to the expected format for plotting
         plot_data = []
@@ -68,6 +71,13 @@ def run_simulation_with_varying_pressure(model = 'PHREEQC'):
         response_data = {
             "plot_data": plot_data
         }
+
+        print('this is the response data for plotting:')
+        print(type(response_data['plot_data']), flush=True)
+        print(type(response_data['plot_data'][0]), flush=True)
+        print(type(response_data['plot_data'][0][0]), flush=True)
+        #print(type(response_data['plot_data']['Pressure(MPa)']), flush=True)
+        #print(type(response_data['plot_data']['Pressure(MPa)'][0]), flush=True)
 
         return jsonify({
             "status": "success",
@@ -91,12 +101,14 @@ def run_state_simulation_endpoint():
         temperature = data.get('temperature')
         pressure = data.get('pressure')
         concentrations = data.get('concentrations')
+        model = data.get('model')
         
         # Call the run_state_simulation function to get only the dissolved CO2 value
         dissolved_co2 = run_state_simulation(
             temperature=temperature,
             pressure=pressure, 
-            species=concentrations
+            species=concentrations,
+            model = model
         )
         
         response_data = {
@@ -118,4 +130,4 @@ def run_state_simulation_endpoint():
 
 if __name__ == '__main__':
 
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
