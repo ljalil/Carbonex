@@ -1,11 +1,11 @@
 <template>
   <ModelSelection />
   <UnitsSettings 
-    @temperature-unit-changed="updateTemperatureUnit"
-    @pressure-unit-changed="updatePressureUnit"
+  @temperature-unit-changed="updateTemperatureUnit"
+  @pressure-unit-changed="updatePressureUnit"
   />
-  <WaterChemistry />
   <OperationalSettings />
+  <WaterChemistry />
 </template>
 
 <script lang="ts">

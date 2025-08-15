@@ -6,14 +6,14 @@
 
   </head>
 
-  <body class="dark">
+  <body>
     <el-col :span="24">
       <Header></Header>
       <el-row :gutter="20">
-        <el-col :span="5" :gutter="20">
+        <el-col :span="5">
           <Sidebar></Sidebar>
         </el-col>
-        <el-col :span="14" :gutter="20">
+        <el-col :span="14">
 
 
             <ActionBar></ActionBar>
@@ -62,4 +62,6 @@ html {
   margin: 0;
   padding: 0;
 }
+
+
 </style>

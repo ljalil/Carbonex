@@ -36,8 +36,22 @@
         <span class="unit-label">mol/kg</span>
       </el-form-item>
     </el-form>
-    <el-alert v-if="!isChargeBalanced" title="Charge imbalance" center show-icon type="error" :closable="false" />
-    <el-alert v-else title="Charge balanced" center show-icon type="success" :closable="false" />
+    <el-alert 
+      v-if="!isChargeBalanced" 
+      :title="`Charge imbalanced: ${chargeSum.toFixed(4)}m`" 
+      center 
+      show-icon 
+      type="error" 
+      :closable="false" 
+    />
+    <el-alert 
+      v-else 
+      :title="`Charge balanced: ${chargeSum.toFixed(4)}m`" 
+      center 
+      show-icon 
+      type="success" 
+      :closable="false" 
+    />
   </el-card>
 </template>
 
@@ -89,15 +103,17 @@ export default defineComponent({
       "CO3-2": -2,
     };
 
-    const presetOptions = ['Seawater', 'Freshwater', 'Brackish water'];
+    const presetOptions = ['Seawater'];
 
     const isChargeBalanced = ref(true);
+    const chargeSum = ref(0);
 
     const calculateChargeBalance = () => {
       let totalCharge = 0;
       for (const ion of ions) {
         totalCharge += store.simulationInput.concentrations[ion] * ionCharges[ion];
       }
+      chargeSum.value = totalCharge;
       // You might want to define a tolerance for what you consider "balanced"
       isChargeBalanced.value = Math.abs(totalCharge) < 0.0001;
     };
@@ -125,14 +141,13 @@ export default defineComponent({
       
       if (preset === "Seawater") {
         // Update concentrations with seawater values
-        store.simulationInput.concentrations["Na+"] = 0.4791;
-        store.simulationInput.concentrations["K+"] = 0.009796;
-        store.simulationInput.concentrations["Ca+2"] = 0.011478;
-        store.simulationInput.concentrations["Mg+2"] = 0.026167;
-        store.simulationInput.concentrations["Cl-"] = 0.5134;
-        store.simulationInput.concentrations["SO4-2"] = 0.02021;
+        store.simulationInput.concentrations["Cl-"] = 0.546;
+        store.simulationInput.concentrations["Na+"] = 0.469;
+        store.simulationInput.concentrations["Mg+2"] = 0.0528;
+        store.simulationInput.concentrations["SO4-2"] = 0.0282;
+        store.simulationInput.concentrations["Ca+2"] = 0.0103;
+        store.simulationInput.concentrations["K+"] = 0.0102;
       }
-      // We only have seawater preset for now, can add others later
       calculateChargeBalance();
     };
 
@@ -143,6 +158,7 @@ export default defineComponent({
       formatIonName,
       calculateChargeBalance,
       isChargeBalanced,
+      chargeSum,
       updateWaterPreset,
     };
   },

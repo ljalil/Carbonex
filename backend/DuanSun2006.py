@@ -520,3 +520,106 @@ class DuanSun2006:
         result = {'Pressure (MPa)': pressures, 'Dissolved CO2 (mol/kg)': solubilities}
 
         return result
+
+if __name__ == "__main__":
+    # Create a grid of pressures and temperatures for CO2 solubility analysis
+    # Temperature range: 280 to 480 K (approximately 7°C to 207°C)
+    # Pressure range: 0.5 to 50 MPa
+    
+    # Define temperature and pressure ranges
+    temperatures = np.linspace(280, 480, 50)  # 50 points from 280 to 480 K
+    pressures = np.linspace(0.5, 50, 50)     # 50 points from 0.5 to 50 MPa
+    
+    # Create meshgrid for contour plotting
+    T_grid, P_grid = np.meshgrid(temperatures, pressures)
+    
+    # Initialize the DuanSun2006 model
+    model = DuanSun2006()
+    
+    # Initialize solubility grid
+    solubility_grid = np.zeros_like(T_grid)
+    
+    print("Calculating CO2 solubility grid...")
+    print(f"Temperature range: {temperatures.min():.1f} - {temperatures.max():.1f} K")
+    print(f"Pressure range: {pressures.min():.1f} - {pressures.max():.1f} MPa")
+    
+    # Calculate solubility for each T-P point (pure water, no ions)
+    for i, T in enumerate(temperatures):
+        for j, P in enumerate(pressures):
+            try:
+                # Calculate solubility for pure water (no molalities provided)
+                solubility = model.calculate_CO2_solubility(P, T, molalities=None, model="DuanSun")
+                solubility_grid[j, i] = solubility
+            except Exception as e:
+                print(f"Error at T={T:.1f}K, P={P:.1f}MPa: {e}")
+                solubility_grid[j, i] = np.nan
+        
+        # Progress indicator
+        if (i + 1) % 10 == 0:
+            print(f"Progress: {i + 1}/{len(temperatures)} temperature points completed")
+    
+    print("Grid calculation complete!")
+    
+    # Create the heatmap
+    plt.figure(figsize=(12, 8))
+    
+    # Create contour plot
+    contour = plt.contourf(T_grid, P_grid, solubility_grid, levels=20, cmap='viridis')
+    plt.colorbar(contour, label='CO2 Solubility (mol/kg H2O)')
+    
+    # Add contour lines
+    contour_lines = plt.contour(T_grid, P_grid, solubility_grid, levels=10, colors='white', alpha=0.5, linewidths=0.5)
+    plt.clabel(contour_lines, inline=True, fontsize=8, fmt='%.3f')
+    
+    # Formatting
+    plt.xlabel('Temperature (K)', fontsize=12)
+    plt.ylabel('Pressure (MPa)', fontsize=12)
+    plt.title('CO2 Solubility in Pure Water\n(Duan & Sun 2006 Model)', fontsize=14, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    
+    # Add temperature in Celsius as secondary x-axis
+    ax1 = plt.gca()
+    ax2 = ax1.twiny()
+    ax2.set_xlim(ax1.get_xlim())
+    celsius_ticks = np.arange(0, 220, 20)  # Celsius ticks every 20°C
+    kelvin_ticks = celsius_ticks + 273.15
+    ax2.set_xticks(kelvin_ticks)
+    ax2.set_xticklabels([f'{c:.0f}°C' for c in celsius_ticks])
+    ax2.set_xlabel('Temperature (°C)', fontsize=12)
+    
+    plt.tight_layout()
+    
+    # Save the plot
+    plt.savefig('co2_solubility_heatmap.png', dpi=300, bbox_inches='tight')
+    print("Heatmap saved as 'co2_solubility_heatmap.png'")
+    
+    # Display the plot
+    plt.show()
+    
+    # Print some statistics
+    print(f"\nStatistics:")
+    print(f"Minimum solubility: {np.nanmin(solubility_grid):.6f} mol/kg")
+    print(f"Maximum solubility: {np.nanmax(solubility_grid):.6f} mol/kg")
+    print(f"Mean solubility: {np.nanmean(solubility_grid):.6f} mol/kg")
+    
+    # Find conditions for min and max solubility
+    min_idx = np.unravel_index(np.nanargmin(solubility_grid), solubility_grid.shape)
+    max_idx = np.unravel_index(np.nanargmax(solubility_grid), solubility_grid.shape)
+    
+    print(f"Minimum solubility occurs at T={T_grid[min_idx]:.1f}K, P={P_grid[min_idx]:.1f}MPa")
+    print(f"Maximum solubility occurs at T={T_grid[max_idx]:.1f}K, P={P_grid[max_idx]:.1f}MPa")
+    
+    # Save data to CSV for further analysis
+    data_for_csv = []
+    for i, T in enumerate(temperatures):
+        for j, P in enumerate(pressures):
+            data_for_csv.append({
+                'Temperature_K': T,
+                'Temperature_C': T - 273.15,
+                'Pressure_MPa': P,
+                'CO2_Solubility_mol_per_kg': solubility_grid[j, i]
+            })
+    
+    df = pd.DataFrame(data_for_csv)
+    df.to_csv('co2_solubility_grid_data.csv', index=False)
+    print("Data saved to 'co2_solubility_grid_data.csv'")

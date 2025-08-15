@@ -1,3 +1,6 @@
+body {
+  margin:0;
+}
 
 .description {
   color: gray;
@@ -14,6 +17,11 @@
   margin-left: 10px;
   font-size: 13px;
   color: gray;
+}
+
+.el-row {
+  margin-left: 10px !important;
+  margin-right: 10px !important;
 }
 
 .el-select {

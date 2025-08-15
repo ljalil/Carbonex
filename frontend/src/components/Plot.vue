@@ -17,6 +17,10 @@ import { defineComponent, provide, computed } from 'vue';
 import type { PropType } from 'vue';
 import { progressProps } from 'element-plus';
 
+
+
+
+
 // Register required components for ECharts
 use([
   CanvasRenderer,
@@ -28,7 +32,7 @@ use([
 ]);
 
 // Provide the theme for the chart
-provide(THEME_KEY, 'light');
+provide(THEME_KEY, 'dark');
 
 export default defineComponent({
   name: 'Plot',

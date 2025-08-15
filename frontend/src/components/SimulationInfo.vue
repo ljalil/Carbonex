@@ -214,7 +214,7 @@
       };
 
       const displayCO2Value = computed(() => simulationOutput.value.total_dissolved_co2 != null);
-      const formatCO2Value = computed(() => simulationOutput.value.total_dissolved_co2?.toFixed(2) || "N/A");
+      const formatCO2Value = computed(() => simulationOutput.value.total_dissolved_co2?.toFixed(4) || "N/A");
   
       return {
         temperatureUnits,

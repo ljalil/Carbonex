@@ -11,7 +11,7 @@ export async function runStaticSimulation() {
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/run_state_simulation",
+      "http://127.0.0.1:5000/simulate/solubility/fixed",
       payload
     );
 
@@ -45,7 +45,7 @@ export async function runSimulation() {
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/solution_properties",
+      "http://127.0.0.1:5000/simulate/solution/properties",
       payload
     );
 
@@ -83,7 +83,7 @@ export async function runSimulationWithVaryingPressure() {
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/run_simulation_with_varying_pressure",
+      "http://127.0.0.1:5000/simulate/solubility/var-p",
       payload
     );
 

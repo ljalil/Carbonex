@@ -10,8 +10,8 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 
-@app.route('/solution_properties', methods=['POST'])
-def solution_properties():
+@app.route('/simulate/solution/properties', methods=['POST'])
+def simulate_solution_properties():
     try:
         data = request.json
 
@@ -49,8 +49,8 @@ def solution_properties():
         })
 
 
-@app.route('/run_simulation_with_varying_pressure', methods=['POST'])
-def run_simulation_with_varying_pressure():
+@app.route('/simulate/solubility/var-p', methods=['POST'])
+def simulate_solubility_var_p_endpoint():
     try:
         data = request.json
 
@@ -93,8 +93,8 @@ def run_simulation_with_varying_pressure():
         })
 
 
-@app.route('/run_state_simulation', methods=['POST'])
-def run_state_simulation_endpoint():
+@app.route('/simulate/solubility/fixed', methods=['POST'])
+def simulate_solubility_fixed_endpoint():
     try:
         data = request.json
 
