@@ -6,8 +6,8 @@
       </div>
     </template>
 
-    <el-form label-position="left">
-      <el-form-item label="Preset">
+    <el-form label-position="left" label-width="70px">
+      <el-form-item label="Preset" >
         <el-select
           size="small"
           v-model="store.simulationInput.preset"
@@ -23,17 +23,18 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item v-for="ion in ions" :key="ion">
-        <span v-html="formatIonName(ion)" class="ion-label"></span>
+      <el-form-item v-for="ion in ions" :key="ion" :label="ion">
+        <!--<span v-html="formatIonName(ion)" class="ion-label"></span>-->
         <el-input-number
           v-model="store.simulationInput.concentrations[ion]"
           size="small"
           :min="0"
           :precision="4"
           :step="0.1"
+          
           @change="calculateChargeBalance"
         />
-        <span class="unit-label">mol/kg</span>
+        <span class="el-form-item__label unit-label">mol/kg</span>
       </el-form-item>
     </el-form>
     <el-alert 
@@ -103,7 +104,7 @@ export default defineComponent({
       "CO3-2": -2,
     };
 
-    const presetOptions = ['Seawater'];
+    const presetOptions = ['Pure water', 'Seawater'];
 
     const isChargeBalanced = ref(true);
     const chargeSum = ref(0);
@@ -147,6 +148,15 @@ export default defineComponent({
         store.simulationInput.concentrations["SO4-2"] = 0.0282;
         store.simulationInput.concentrations["Ca+2"] = 0.0103;
         store.simulationInput.concentrations["K+"] = 0.0102;
+      }
+
+      else if (preset === "Pure water") {
+        store.simulationInput.concentrations["Cl-"] = 0;
+        store.simulationInput.concentrations["Na+"] = 0;
+        store.simulationInput.concentrations["Mg+2"] = 0;
+        store.simulationInput.concentrations["SO4-2"] = 0;
+        store.simulationInput.concentrations["Ca+2"] = 0;
+        store.simulationInput.concentrations["K+"] = 0;
       }
       calculateChargeBalance();
     };

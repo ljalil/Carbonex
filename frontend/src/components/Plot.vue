@@ -1,9 +1,11 @@
 <template>
-  <v-chart class="chart" v-if="data.length !== 0" :option="chartOption" autoresize />
-  <div class="no-plot" v-else>
-    <h2>No data to display</h2>
-    <p>Run simulation to display the resulting plots.</p>
+  <div class="plot-container">
+    <v-chart class="chart" v-if="data.length !== 0" :option="chartOption" autoresize />
+    <div class="no-plot" v-else>
+      <h2>No data to display</h2>
+      <p>Run simulation to display the resulting plots.</p>
     </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -45,6 +47,18 @@ export default defineComponent({
       type: Array as PropType<[number, number][]>, // Array of [number, number] pairs
       required: true,
     },
+    xAxisLabel: {
+      type: String,
+      default: 'X Axis'
+    },
+    yAxisLabel: {
+      type: String,
+      default: 'Y Axis'
+    },
+    tooltipLabels: {
+      type: Object as PropType<[string, string]>, // [xLabel, yLabel] for tooltip
+      default: () => ['X', 'Y'] as [string, string]
+    },
   },
   setup(props) {
     // Dynamically compute chart options using props.data
@@ -59,7 +73,7 @@ export default defineComponent({
           const xValue = params[0].data[0].toFixed(2);
           const yValue = params[0].data[1].toFixed(4);
           // Return formatted string with labels
-          return `Pressure: ${xValue} MPa<br>Dissolved CO2: ${yValue} mol/kg`;
+          return `${props.tooltipLabels[0]}: ${xValue}<br>${props.tooltipLabels[1]}: ${yValue}`;
         }
       },
       grid: {
@@ -70,13 +84,15 @@ export default defineComponent({
       },
       xAxis: {
         type: 'value',
-        name: 'Pressure (MPa)',
+        name: props.xAxisLabel,
         nameLocation: 'center',
         nameGap: 30,
+        min: 'dataMin',
+        max: 'dataMax'
       },
       yAxis: {
         type: 'value',
-        name: 'Dissolved CO2 (mol/kg)',
+        name: props.yAxisLabel,
         nameLocation: 'center',
         nameGap: 30,
       },
@@ -97,7 +113,27 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.chart, .no-plot {
-  height: 90%;
+.plot-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-height: 300px; /* Ensure a minimum height */
+}
+
+.no-plot {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 </style>

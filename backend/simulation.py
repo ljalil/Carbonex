@@ -208,6 +208,62 @@ def _simulate_varying_pressure_DuanSun(temperature, ion_moles):
     result = model.calculate_varying_pressure(P_start, P_end, P_step, temperature, ion_moles, model="DuanSun")
     return result
 
+def _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database):
+    """
+    Use PHREEQC to calculate CO2 solubility over a temperature range.
+    Since PHREEQC cannot vary temperature the same way as pressure, we call
+    _run_PHREEQC_state_simulation multiple times with different temperatures.
+    Returns dict with lists for 'Temperature (K)' and 'Dissolved CO2 (mol/kg)'.
+    """
+    # Define temperature range: start, end, step (K)
+    T_start = 273.15  # 0°C
+    T_end = 573.15   # 100°C
+    T_step = 5.0     # 5K steps
+    
+    result = {'Temperature (K)': [], 'Dissolved CO2 (mol/kg)': []}
+    
+    # Generate temperature array
+    temperatures = []
+    temp = T_start
+    while temp <= T_end:
+        temperatures.append(temp)
+        temp += T_step
+    
+    for temperature in temperatures:
+        try:
+            dissolved_co2 = _run_PHREEQC_state_simulation(temperature, pressure, ion_moles, database)
+            result['Temperature (K)'].append(temperature)
+            result['Dissolved CO2 (mol/kg)'].append(dissolved_co2)
+        except Exception as e:
+            print(f"Error at temperature {temperature}: {e}")
+            # Skip this temperature point on error
+            continue
+    
+    return result
+
+def _simulate_varying_temperature_Carbonex(pressure, ion_moles):
+    """
+    Placeholder for Carbonex model varying temperature calculation.
+    """
+    return {'Temperature (K)': [], 'Dissolved CO2 (mol/kg)': []}
+
+def _simulate_varying_temperature_DuanSun(pressure, ion_moles):
+    """
+    Use Duan and Sun (2006) model to calculate CO2 solubility over a temperature range.
+    Returns dict with lists for 'Temperature (K)' and 'Dissolved CO2 (mol/kg)'.
+    """
+    print('from _simulate_varying_temperature_DuanSun', flush=True)
+    model = DuanSun2006.DuanSun2006()
+    
+    # Define temperature range: start, end, step (K)
+    T_start = 273.15  # 0°C
+    T_end = 573.15   # 100°C
+    T_step = 5.0     # 5K steps
+    
+    result = model.calculate_varying_temperature(T_start, T_end, T_step, pressure, ion_moles, model="DuanSun")
+    
+    return result
+
 def simulate_varying_pressure(temperature, ion_moles, model):
     #print(f'running varying pressure simulation with {model}')
     if model == 'phreeqc_phreeqc':
@@ -227,6 +283,33 @@ def simulate_varying_pressure(temperature, ion_moles, model):
         # Default to empty result for unknown models
         result = {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
         
+    
+    return result
+
+def simulate_varying_temperature(pressure, ion_moles, model):
+    """
+    Simulate CO2 solubility over a range of temperatures at fixed pressure.
+    
+    Parameters:
+        pressure: Fixed pressure in MPa
+        ion_moles: Dictionary of ion molalities 
+        model: Model to use ('phreeqc_phreeqc', 'phreeqc_pitzer', 'duan_sun_2006', 'carbonex')
+    
+    Returns:
+        dict: Contains 'Temperature (K)' and 'Dissolved CO2 (mol/kg)' lists
+    """
+    if model == 'phreeqc_phreeqc':
+        result = _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database='phreeqc')
+    elif model == 'phreeqc_pitzer':
+        result = _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database='pitzer')
+    elif model == 'duan_sun_2006':
+        print('using duan sun model for varying temperature', flush=True)
+        result = _simulate_varying_temperature_DuanSun(pressure, ion_moles)
+    elif model == 'carbonex':
+        result = _simulate_varying_temperature_Carbonex(pressure, ion_moles)
+    else:
+        # Default to empty result for unknown models
+        result = {'Temperature (K)': [], 'Dissolved CO2 (mol/kg)': []}
     
     return result
     
@@ -336,6 +419,68 @@ def _run_Duan_Sun_state_simulation(temperature, pressure, species):
     except Exception:
         dissolved_co2 = 0
     return dissolved_co2
+
+def simulate_varying_pressure_temperature(ion_moles, model):
+    """
+    Calculate CO2 solubility over a grid of pressure and temperature values.
+    Returns dict with grid data suitable for heatmap visualization.
+    """
+    # Define pressure range: start, end, step (MPa)
+    P_start = 0.1
+    P_end = 100.0
+    P_step = 1.0
+    
+    # Define temperature range: start, end, step (K)
+    T_start = 273.15  # 0°C
+    T_end = 573.15   # 100°C
+    T_step = 1.0     # 5K steps
+    
+    # Generate pressure and temperature arrays
+    pressures = []
+    temperatures = []
+    
+    pressure = P_start
+    while pressure <= P_end:
+        pressures.append(pressure)
+        pressure += P_step
+        
+    temperature = T_start
+    while temperature <= T_end:
+        temperatures.append(temperature)
+        temperature += T_step
+    
+    # Generate grid data
+    grid_data = []
+    
+    for i, temp in enumerate(temperatures):
+        for j, press in enumerate(pressures):
+            try:
+                if model in ['phreeqc_phreeqc', 'phreeqc_pitzer']:
+                    database = 'phreeqc' if model == 'phreeqc_phreeqc' else 'pitzer'
+                    dissolved_co2 = _run_PHREEQC_state_simulation(temp, press, ion_moles, database)
+                elif model == 'duan_sun_2006':
+                    dissolved_co2 = _run_Duan_Sun_state_simulation(temp, press, ion_moles)
+                elif model == 'carbonex':
+                    # Placeholder - could implement proper Carbonex model
+                    dissolved_co2 = 3.0
+                else:
+                    dissolved_co2 = 0.0
+                
+                # Format: [temperature_index, pressure_index, co2_solubility]
+                grid_data.append([i, j, dissolved_co2])
+                
+            except Exception as e:
+                print(f"Error at T={temp}K, P={press}MPa: {e}")
+                # Use 0 for failed calculations
+                grid_data.append([i, j, 0.0])
+    
+    result = {
+        'grid_data': grid_data,
+        'temperatures': temperatures,
+        'pressures': pressures
+    }
+    
+    return result
 
 def run_state_simulation(temperature, pressure, species, model):
     if model == 'phreeqc_phreeqc':

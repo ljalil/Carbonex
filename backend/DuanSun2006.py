@@ -521,6 +521,45 @@ class DuanSun2006:
 
         return result
 
+    def calculate_varying_temperature(
+        self,
+        T_start: float,
+        T_end: float,
+        T_step: float,
+        P: float,
+        molalities: Optional[Dict[str, float]] = None,
+        model: str = "DuanSun",
+    ) -> Dict[str, list]:
+        """
+        Calculate CO2 solubility over a range of temperatures at constant pressure and ion molalities.
+
+        Parameters:
+            T_start: Starting temperature in Kelvin
+            T_end: Ending temperature in Kelvin
+            T_step: Temperature increment in Kelvin
+            P: Pressure in MPa
+            molalities: Dictionary of ion molalities (keys like 'Na+', 'Cl-')
+            model: 'DuanSun' or 'Guo'
+
+        Returns:
+            Dict with keys 'Temperature (K)' and 'Dissolved CO2 (mol/kg)' containing lists.
+        """
+        print('from inside DuanSun2006 calculate_varying_temperature', flush=True)
+        if molalities is None:
+            molalities = {}
+        
+        # Prepare temperature array
+        temperatures = np.arange(T_start, T_end + T_step, T_step).tolist()
+        solubilities = []
+        
+        for T in temperatures:
+            sol = self.calculate_CO2_solubility(P, T, molalities, model)
+            solubilities.append(sol)
+        
+        result = {'Temperature (K)': temperatures, 'Dissolved CO2 (mol/kg)': solubilities}
+        
+        return result
+
 if __name__ == "__main__":
     # Create a grid of pressures and temperatures for CO2 solubility analysis
     # Temperature range: 280 to 480 K (approximately 7°C to 207°C)

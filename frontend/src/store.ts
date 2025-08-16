@@ -25,7 +25,13 @@ interface SimulationOutput {
   activity_of_water: number;
   osmotic_coefficient: number;
   speciesData: SpeciesData[];
-  plotData: [number, number][]; // Array of [x, y] pairs for the pressure vs CO2 solubility plot
+  plotDataPressure: [number, number][]; // Array of [pressure, CO2] pairs for variable pressure plot
+  plotDataTemperature: [number, number][]; // Array of [temperature, CO2] pairs for variable temperature plot
+  heatmapData: {
+    grid_data: [number, number, number][]; // Array of [temp_index, pressure_index, CO2] for heatmap
+    temperatures: number[]; // Temperature values in Kelvin
+    pressures: number[]; // Pressure values in MPa
+  };
 }
 
 // Define available unit types
@@ -64,7 +70,7 @@ export const store = reactive<{
         "HCO3-": 0,
         "CO3-2": 0
     },
-    model: 'carbonex' // Default model
+    model: 'duan_sun_2006', // Default model
   },
   simulationOutput: {
     total_dissolved_co2: 0,
@@ -83,7 +89,13 @@ export const store = reactive<{
       { species: "HCO3-", activity: 0, molar_volume: 0 },
       { species: "CO3-2", activity: 0, molar_volume: 0 },
     ],
-    plotData: []
+    plotDataPressure: [],
+    plotDataTemperature: [],
+    heatmapData: {
+      grid_data: [],
+      temperatures: [],
+      pressures: []
+    }
   },
   unitPreferences: {
     temperatureUnit: 'kelvin',

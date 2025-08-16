@@ -12,6 +12,7 @@
           size="small"
           v-model="store.simulationInput.model"
           placeholder="Select model"
+
         >
           <el-option
             v-for="option in modelOptions"

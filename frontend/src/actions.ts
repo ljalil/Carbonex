@@ -59,7 +59,7 @@ export async function runSimulation() {
     store.simulationOutput.osmotic_coefficient = parseFloat(responseData.osmotic_coefficient || 0);
     store.simulationOutput.speciesData = responseData.species_data || [];
     
-    // IMPORTANT: Do NOT touch plotData here, as this endpoint doesn't provide it.
+    // IMPORTANT: Do NOT touch plotDataPressure or plotDataTemperature here, as this endpoint doesn't provide them.
 
   } catch (error) {
     console.error("Error during simulation:", error);
@@ -70,7 +70,7 @@ export async function runSimulation() {
     store.simulationOutput.activity_of_water = 0;
     store.simulationOutput.osmotic_coefficient = 0;
     store.simulationOutput.speciesData = [];
-    // Do not reset plotData or total_dissolved_co2 on this specific error
+    // Do not reset plotDataPressure, plotDataTemperature or total_dissolved_co2 on this specific error
   }
 }
 
@@ -89,14 +89,75 @@ export async function runSimulationWithVaryingPressure() {
 
     const plotData = response.data.data.plot_data || [];
 
-    // CORRECT: Update just the plotData property
-    store.simulationOutput.plotData = plotData;
+    // CORRECT: Update just the plotDataPressure property
+    store.simulationOutput.plotDataPressure = plotData;
 
-    console.log("Plot data updated with varying pressure results:", store.simulationOutput.plotData);
+    console.log("Plot data updated with varying pressure results:", store.simulationOutput.plotDataPressure);
 
   } catch (error) {
     console.error("Error during varying pressure simulation:", error);
-    // On error, reset only the plot data
-    store.simulationOutput.plotData = [];
+    // On error, reset only the pressure plot data
+    store.simulationOutput.plotDataPressure = [];
+  }
+}
+
+export async function runSimulationWithVaryingTemperature() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      pressure: store.simulationInput.pressure,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/solubility/var-t",
+      payload
+    );
+
+    const plotData = response.data.data.plot_data || [];
+
+    // CORRECT: Update just the plotDataTemperature property
+    store.simulationOutput.plotDataTemperature = plotData;
+
+    console.log("Plot data updated with varying temperature results:", store.simulationOutput.plotDataTemperature);
+
+  } catch (error) {
+    console.error("Error during varying temperature simulation:", error);
+    // On error, reset only the temperature plot data
+    store.simulationOutput.plotDataTemperature = [];
+  }
+}
+
+export async function runSimulationWithVaryingPressureTemperature() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/solubility/var-pt",
+      payload
+    );
+
+    const responseData = response.data.data;
+
+    // CORRECT: Update the heatmap data
+    store.simulationOutput.heatmapData = {
+      grid_data: responseData.grid_data || [],
+      temperatures: responseData.temperatures || [],
+      pressures: responseData.pressures || []
+    };
+
+    console.log("Heatmap data updated with varying pressure-temperature results:", store.simulationOutput.heatmapData);
+
+  } catch (error) {
+    console.error("Error during varying pressure-temperature simulation:", error);
+    // On error, reset the heatmap data
+    store.simulationOutput.heatmapData = {
+      grid_data: [],
+      temperatures: [],
+      pressures: []
+    };
   }
 }

@@ -19,8 +19,11 @@ body {
   color: gray;
 }
 
-.el-row {
+.el-row:first-of-type {
   margin-left: 10px !important;
+}
+
+.el-row:last-of-type {
   margin-right: 10px !important;
 }
 
@@ -91,3 +94,9 @@ border: 1px solid #ebeef5;
 color: darkgray;
 margin: 10px 0;
 }
+
+.el-alert {
+  padding: 4px 16px;
+  margin-top: 8px;
+}
+

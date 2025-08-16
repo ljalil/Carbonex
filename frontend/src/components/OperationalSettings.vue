@@ -15,7 +15,7 @@
           :step="1"
           @change="handleTemperatureChange"
         />
-        <span class="unit-label">{{ temperatureUnitLabel }}</span>
+        <span class="el-form-item__label unit-label">{{ temperatureUnitLabel }}</span>
       </el-form-item>
 
       <el-form-item label="Pressure">
@@ -27,7 +27,7 @@
           :step="1"
           @change="handlePressureChange"
         />
-        <span class="unit-label">{{ pressureUnitLabel }}</span>
+        <span class="el-form-item__label unit-label">{{ pressureUnitLabel }}</span>
       </el-form-item>
     </el-form>
   </el-card>

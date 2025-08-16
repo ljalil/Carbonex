@@ -1,34 +1,21 @@
 <template>
-
-  <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-
-  </head>
-
-  <body>
-    <el-col :span="24">
-      <Header></Header>
-      <el-row :gutter="20">
-        <el-col :span="5">
-          <Sidebar></Sidebar>
-        </el-col>
-        <el-col :span="14">
-
-
-            <ActionBar></ActionBar>
-            <Plot :data="store.simulationOutput.plotData"></Plot>
-
-        </el-col>
-        <el-col :span="5">
-          <SimulationInfo></SimulationInfo>
-        </el-col>
-
-      </el-row>
-    </el-col>
-  </body>
-
-
+  <div class="app-container">
+    <Header></Header>
+    <el-row :gutter="20" class="main-content">
+      <el-col :span="5">
+        <Sidebar></Sidebar>
+      </el-col>
+      <el-col :span="14" class="center-column">
+        <div class="center-content">
+          <ActionBar></ActionBar>
+          <TabsContainer></TabsContainer>
+        </div>
+      </el-col>
+      <el-col :span="5">
+        <SimulationInfo></SimulationInfo>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 <script>
 import axios from "axios";
@@ -36,12 +23,12 @@ import { ElButton } from 'element-plus'
 import Sidebar from './components/Sidebar.vue'
 import SimulationInfo from './components/SimulationInfo.vue';
 import Header from './components/Header.vue';
-import Plot from './components/Plot.vue';
 import ActionBar from './components/ActionBar.vue';
+import TabsContainer from './components/TabsContainer.vue';
 import { store } from './store';
 
 export default {
-  components: { ElButton, Header, Sidebar, SimulationInfo, Plot, ActionBar },
+  components: { ElButton, Header, Sidebar, SimulationInfo, ActionBar, TabsContainer },
   data() {
     return {
       store
@@ -56,12 +43,31 @@ export default {
 </script>
 
 <style scoped>
-body,
-html {
+/* Apply font to the entire app */
+* {
   font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
 }
 
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+}
 
+.main-content {
+  flex: 1;
+  height: calc(100vh - 60px); /* Adjust based on header height */
+  margin: 0 !important;
+}
+
+.center-column {
+  height: 100%;
+}
+
+.center-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 </style>

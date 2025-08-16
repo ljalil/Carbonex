@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from simulation import get_solution_properties, simulate_varying_pressure, run_state_simulation
+from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation
 
 
 import numpy as np
@@ -87,6 +87,84 @@ def simulate_solubility_var_p_endpoint():
 
     except Exception as e:
         print(f"Error from varying pressure: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
+
+@app.route('/simulate/solubility/var-t', methods=['POST'])
+def simulate_solubility_var_t_endpoint():
+    try:
+        data = request.json
+
+        pressure = data.get('pressure')
+        concentrations = data.get('concentrations')
+        model = data.get('model')
+        print('running simulation with varying temperature, model', model, flush=True)
+        
+        # Call the simulate_varying_temperature function
+        result = simulate_varying_temperature(pressure=pressure, ion_moles=concentrations, model=model)
+        
+        # Convert the result to the expected format for plotting
+        plot_data = []
+        for i in range(len(result['Temperature (K)'])):
+            plot_data.append([result['Temperature (K)'][i], result['Dissolved CO2 (mol/kg)'][i]])
+        
+        response_data = {
+            "plot_data": plot_data
+        }
+
+        print('this is the response data for varying temperature plotting:')
+        print(type(response_data['plot_data']), flush=True)
+        print(type(response_data['plot_data'][0]), flush=True)
+        print(type(response_data['plot_data'][0][0]), flush=True)
+
+        return jsonify({
+            "status": "success",
+            "message": "Simulation with varying temperature completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from varying temperature: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
+
+@app.route('/simulate/solubility/var-pt', methods=['POST'])
+def simulate_solubility_var_pt_endpoint():
+    try:
+        data = request.json
+
+        concentrations = data.get('concentrations')
+        model = data.get('model')
+        print('running simulation with varying pressure and temperature, model', model, flush=True)
+        
+        # Call the simulate_varying_pressure_temperature function
+        result = simulate_varying_pressure_temperature(ion_moles=concentrations, model=model)
+        
+        response_data = {
+            "grid_data": result['grid_data'],
+            "temperatures": result['temperatures'],
+            "pressures": result['pressures']
+        }
+
+        print('this is the response data for pressure-temperature heatmap:')
+        print(f'Grid data length: {len(response_data["grid_data"])}', flush=True)
+        print(f'Temperature range: {len(response_data["temperatures"])} points', flush=True)
+        print(f'Pressure range: {len(response_data["pressures"])} points', flush=True)
+
+        return jsonify({
+            "status": "success",
+            "message": "Simulation with varying pressure and temperature completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from varying pressure-temperature: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
