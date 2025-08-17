@@ -1,4 +1,5 @@
 import os
+import math
 import pandas as pd
 import subprocess
 import csv
@@ -51,7 +52,7 @@ SELECTED_OUTPUT
     -solution True
     -gases CO2(g)
     -saturation_indices CO2(g)
-    -activities   Na+ K+ Cl- SO4+2 Ca+2 Mg+2 HCO3- CO3-2
+    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
     -ionic_strength True
     -calculate_values
 END'''
@@ -95,7 +96,7 @@ END'''
         
         # Handle potential missing keys safely
         try:
-            activity_value = float(results.get(activity_key, 0))
+            activity_value = math.exp(float(results.get(activity_key, 0)))
             molar_volume_value = float(results.get(molar_volume_key, 0))
         except (ValueError, TypeError):
             activity_value = 0
@@ -107,6 +108,8 @@ END'''
             'activity': round(activity_value if activity_value >= threshold else 0, 4),
             'molar_volume': round(molar_volume_value if molar_volume_value >= threshold else 0, 4)
         })
+
+        print(species_data, flush=True)
 
 
 
@@ -360,7 +363,7 @@ SELECTED_OUTPUT
     -solution True
     -gases CO2(g)
     -saturation_indices CO2(g)
-    -activities   Na+ K+ Cl- SO4+2 Ca+2 Mg+2 HCO3- CO3-2
+    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
     -ionic_strength True
     -calculate_values
 END'''

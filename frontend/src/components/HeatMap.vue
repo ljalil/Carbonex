@@ -120,7 +120,7 @@ export default defineComponent({
         xAxis: {
           type: 'category',
           data: temperatureLabels,
-          name: 'Temperature (°C)',
+          name: 'Temperature (K)',
           nameLocation: 'center',
           nameGap: 30,
           axisLabel: {

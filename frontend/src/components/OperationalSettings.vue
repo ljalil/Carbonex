@@ -2,7 +2,7 @@
   <el-card class="operational-card">
     <template #header>
       <div class="card-header">
-        <span>Operational variables</span>
+        <span>Pressure and Temperature</span>
       </div>
     </template>
     <el-form label-position="left" label-width="90px">

@@ -12,15 +12,9 @@
       </div>
     </el-card>
 
-    <el-card class="sidebar-card" shadow="never">
-      <template #header>
-        <div class="card-header">
-          <span>Solution properties</span>
-        </div>
-      </template>
-  
-      <div class="simulation-properties-card">
-        <table style="width: 100%">
+    <el-tabs type="border-card">
+    <el-tab-pane label="Solution">
+      <table style="width: 100%">
           <tr style="height:10px">
             <td style="width:50%"><span class="property-text">Density</span></td>
             <td style="width:15%"><span class="property-value">{{ simulationOutput.density }}</span></td>
@@ -52,15 +46,21 @@
           </tr>
 
         </table>
-
-
+    </el-tab-pane>
+    <el-tab-pane label="Activities">
+      <div class="activity-chart-container">
+        <BarPlot 
+          :data="activityData" 
+          xAxisLabel="Activity" 
+        />
       </div>
-    </el-card>
-  
+    </el-tab-pane>
+    <el-tab-pane label="Molar">
 
-    <el-table
+          <el-table
     :data="simulationOutput.speciesData"
     border
+    stripe
     style="width: 100%; ">
     <el-table-column
       prop="species"
@@ -70,18 +70,21 @@
         <span v-html="formatIonName(scope.row.species)"></span>
       </template>
     </el-table-column>
-    <el-table-column
-      prop="activity"
-      label="Activity"
-      align="center"
-      width="100">
-    </el-table-column>
+
     <el-table-column
       prop="molar_volume"
       label="Molar volume"
       align="center">
     </el-table-column>
   </el-table>
+    </el-tab-pane>
+
+  </el-tabs>
+
+    
+  
+
+
   
 
   </template>
@@ -109,6 +112,7 @@
     Share,
     Upload,
   } from "@element-plus/icons-vue";
+  import BarPlot from "./BarPlot.vue";
 
   interface UnitOption {
     label: string;
@@ -124,6 +128,7 @@
       ElSelect,
       ElOption,
       ElCol,
+      BarPlot,
     },
 
     setup() {
@@ -213,6 +218,14 @@
         console.log("Water preset updated:", value);
       };
 
+      // Compute data for activity bar plot
+      const activityData = computed(() => {
+        return (simulationOutput.value.speciesData || []).map((item: any) => ({
+          label: item.species,
+          value: item.activity,
+        }));
+      });
+
       const displayCO2Value = computed(() => simulationOutput.value.total_dissolved_co2 != null);
       const formatCO2Value = computed(() => simulationOutput.value.total_dissolved_co2?.toFixed(4) || "N/A");
   
@@ -238,7 +251,8 @@
         simulationOutput,
         formatIonName,
         displayCO2Value,
-        formatCO2Value
+        formatCO2Value,
+        activityData,
       };
     },
   });

@@ -2,7 +2,7 @@
   <div class="tab-content">
     <HeatMap 
       :data="store.simulationOutput.heatmapData"
-      x-axis-label="Temperature (°C)"
+      x-axis-label="Temperature (K)"
       y-axis-label="Pressure (MPa)"
       title="CO₂ Solubility vs Pressure and Temperature"
     />

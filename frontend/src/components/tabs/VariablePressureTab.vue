@@ -1,11 +1,26 @@
 <template>
   <div class="tab-content">
+    
+
+
     <Plot 
       :data="store.simulationOutput.plotDataPressure"
       x-axis-label="Pressure (MPa)"
       y-axis-label="Dissolved CO2 (mol/kg)"
       :tooltip-labels="['Pressure (MPa)', 'Dissolved CO2 (mol/kg)']"
     />
+
+        <el-form  inline="true" label-width="auto" style="max-width: 600px">
+    <el-form-item label="Max pressure">
+      <el-input-number  size="small"/>
+    </el-form-item>
+
+        <el-form-item label="Min pressure">
+      <el-input-number  size="small"/>
+    </el-form-item>
+
+
+    </el-form>
   </div>
 </template>
 
