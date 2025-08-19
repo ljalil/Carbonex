@@ -120,6 +120,7 @@ END'''
         ionic_strength = float(results.get('mu', 0))
         ph = float(results.get('pH', 7.0))
         osmotic_coefficient = float(results.get('OSMOTIC', 0))
+
     except (ValueError, TypeError):
         density = 0
         ionic_strength = 0

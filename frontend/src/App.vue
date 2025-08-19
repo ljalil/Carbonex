@@ -45,14 +45,14 @@ export default {
 <style scoped>
 /* Apply font to the entire app */
 * {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto' !important;
 }
 
 .app-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto' !important;
 }
 
 .main-content {

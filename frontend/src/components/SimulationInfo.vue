@@ -14,39 +14,41 @@
 
     <el-tabs type="border-card">
     <el-tab-pane label="Solution">
+      
       <table style="width: 100%">
           <tr style="height:10px">
             <td style="width:50%"><span class="property-text">Density</span></td>
-            <td style="width:15%"><span class="property-value">{{ simulationOutput.density }}</span></td>
+            <td style="width:15%"><span class="property-value">{{ simulationOutput.density.toFixed(4) }}</span></td>
             <td style="width:25%"><span class="property-unit">g/cm</span></td>
           </tr>
           
           <tr>
             <td><span class="property-text">Ionic strength</span></td>
-            <td><span class="property-value">{{ simulationOutput.ionic_strength }}</span></td>
+            <td><span class="property-value">{{ simulationOutput.ionic_strength.toFixed(4) }}</span></td>
             <td><span class="property-unit">mol/kgw</span></td>
           </tr>
 
           <tr>
             <td><span class="property-text">pH</span></td>
-            <td><span class="property-value">{{ simulationOutput.pH }}</span></td>
+            <td><span class="property-value">{{ simulationOutput.pH.toFixed(4) }}</span></td>
             <td><span class="property-unit"></span></td>
           </tr>
 
-          <tr>
+          <!-- <tr>
             <td><span class="property-text">Activity of water</span></td>
             <td><span class="property-value">{{ simulationOutput.activity_of_water }}</span></td>
             <td><span class="property-unit"></span></td>
-          </tr>
+          </tr> -->
 
           <tr>
             <td><span class="property-text">Osmotic coefficient</span></td>
-            <td><span class="property-value">{{ simulationOutput.osmotic_coefficient }}</span></td>
+            <td><span class="property-value">{{ simulationOutput.osmotic_coefficient.toFixed(4) }}</span></td>
             <td><span class="property-unit"></span></td>
           </tr>
 
         </table>
-    </el-tab-pane>
+        <el-alert title="Solution properties are determined using PHREEQC." type="info" :closable="false" show-icon/>
+      </el-tab-pane>
     <el-tab-pane label="Activities">
       <div class="activity-chart-container">
         <BarPlot 
@@ -54,8 +56,9 @@
           xAxisLabel="Activity" 
         />
       </div>
+      <el-alert title="Activities are determined using PHREEQC." type="info" :closable="false" show-icon/>
     </el-tab-pane>
-    <el-tab-pane label="Molar">
+    <el-tab-pane label="Molar volumes">
 
           <el-table
     :data="simulationOutput.speciesData"
@@ -77,6 +80,7 @@
       align="center">
     </el-table-column>
   </el-table>
+  <el-alert title="Molar volumes are determined using PHREEQC." type="info" :closable="false" show-icon/>
     </el-tab-pane>
 
   </el-tabs>
@@ -275,10 +279,7 @@
     margin-left: 10px;
   }
   
-  .el-select,
-  .el-select-dropdown__item {
-    font-family: "Roboto", sans-serif;
-  }
+
   
   h1 {
     font-weight: 100;

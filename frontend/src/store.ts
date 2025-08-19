@@ -37,6 +37,8 @@ interface SimulationOutput {
 // Define available unit types
 export type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
 export type PressureUnit = 'bar' | 'atm' | 'psi' | 'mpa';
+// Available concentration units for input/output
+export type ConcentrationUnit = 'mol/kg' | 'mol/L' | 'ppm';
 export type ModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
 
 interface SimulationInput {
@@ -50,6 +52,7 @@ interface SimulationInput {
 interface UnitPreferences {
   temperatureUnit: TemperatureUnit;
   pressureUnit: PressureUnit;
+  concentrationUnit: ConcentrationUnit;
 }
 
 export const store = reactive<{
@@ -98,8 +101,9 @@ export const store = reactive<{
     }
   },
   unitPreferences: {
-    temperatureUnit: 'kelvin',
-    pressureUnit: 'mpa'
+  temperatureUnit: 'kelvin',
+  pressureUnit: 'mpa',
+  concentrationUnit: 'mol/kg'
   }
 });
 

@@ -1,8 +1,8 @@
 @import './base.css';
 
 /* Global font family */
-html, body, * {
-  font-family: 'Roboto', sans-serif;
+html, body, *, button, .el-button, .el-button--primary , .el-select-dropdown__item {
+  font-family: 'Roboto' !important;
 }
 
 #app {

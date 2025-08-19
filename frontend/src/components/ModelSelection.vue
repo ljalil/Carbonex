@@ -73,4 +73,8 @@ export default defineComponent({
   align-items: center;
   margin: 0;
 }
+
+.el-select-dropdown__item {
+  font-family: 'Roboto' !important;
+}
 </style>

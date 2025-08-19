@@ -2,12 +2,12 @@
   <el-card class="concentration-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <span>Aqueous species</span>
+        <span>Water chemistry</span>
       </div>
     </template>
 
     <el-form label-position="left" label-width="70px">
-      <el-form-item label="Preset" >
+      <el-form-item label="Preset">
         <el-select
           size="small"
           v-model="store.simulationInput.preset"
@@ -24,40 +24,37 @@
       </el-form-item>
 
       <el-form-item v-for="ion in ions" :key="ion" :label="ion">
-        <!--<span v-html="formatIonName(ion)" class="ion-label"></span>-->
+        <!-- The v-html version can be used for better formatting -->
+        <!-- <span v-html="formatIonName(ion)" class="ion-label"></span> -->
         <el-input-number
           v-model="store.simulationInput.concentrations[ion]"
           size="small"
           :min="0"
           :precision="4"
           :step="0.1"
-          
           @change="calculateChargeBalance"
         />
-        <span class="el-form-item__label unit-label">mol/kg</span>
+        <span class="el-form-item__label unit-label">{{ concentrationUnitLabel }}</span>
       </el-form-item>
     </el-form>
-    <el-alert 
-      v-if="!isChargeBalanced" 
-      :title="`Charge imbalanced: ${chargeSum.toFixed(4)}m`" 
-      center 
-      show-icon 
-      type="error" 
-      :closable="false" 
-    />
-    <el-alert 
-      v-else 
-      :title="`Charge balanced: ${chargeSum.toFixed(4)}m`" 
-      center 
-      show-icon 
-      type="success" 
-      :closable="false" 
-    />
+
+
+        
+    <el-alert
+      :title="alertInfo.title"
+      :type="alertInfo.type"
+      center
+      show-icon
+      :closable="false"
+      class="cbe-alert"
+    >
+    </el-alert>
+  
   </el-card>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
 import { store } from "../store";
 import {
   ElCard,
@@ -83,15 +80,8 @@ export default defineComponent({
   setup() {
     // Define a type for ion names to match the keys in concentrations
     type IonName = "Na+" | "K+" | "Cl-" | "Mg+2" | "Ca+2" | "SO4-2" | "HCO3-" | "CO3-2";
-    
-    const ions: IonName[] = [
-      "Na+",
-      "K+",
-      "Cl-",
-      "Mg+2",
-      "Ca+2",
-      "SO4-2",
-    ];
+
+    const ions: IonName[] = ["Na+", "K+", "Cl-", "Mg+2", "Ca+2", "SO4-2"];
 
     const ionCharges: Record<IonName, number> = {
       "Na+": 1,
@@ -104,53 +94,76 @@ export default defineComponent({
       "CO3-2": -2,
     };
 
+    const concentrationUnitLabel = computed(() => {
+      switch (store.unitPreferences.concentrationUnit) {
+        case 'mol/kg': return 'mol/kg';
+        case 'mol/L': return 'mol/L';
+        case 'ppm': return 'ppm';
+        default: return 'mol/kg';
+      }
+    });
+
     const presetOptions = ['Pure water', 'Seawater'];
 
-    const isChargeBalanced = ref(true);
-    const chargeSum = ref(0);
+    // --- State for Charge Balance Error ---
+    const cbe = ref(0); // Charge Balance Error in %
+    const ACCEPTABLE_ERROR = 5; // % for success
+    const WARNING_THRESHOLD = 10; // % for warning vs. error
 
+    /**
+     * Calculates the Charge Balance Error (%CBE).
+     * %CBE = (Sum(cation equivalents) - Sum(anion equivalents)) / (Sum(cation equivalents) + Sum(anion equivalents)) * 100
+     */
     const calculateChargeBalance = () => {
-      let totalCharge = 0;
+      let sumCations = 0; // Sum of cation equivalents (mol/kg * charge)
+      let sumAnions = 0; // Sum of anion equivalents (mol/kg * |charge|)
+
       for (const ion of ions) {
-        totalCharge += store.simulationInput.concentrations[ion] * ionCharges[ion];
+        const concentration = store.simulationInput.concentrations[ion];
+        const charge = ionCharges[ion];
+        if (charge > 0) {
+          sumCations += concentration * charge;
+        } else {
+          sumAnions += concentration * Math.abs(charge);
+        }
       }
-      chargeSum.value = totalCharge;
-      // You might want to define a tolerance for what you consider "balanced"
-      isChargeBalanced.value = Math.abs(totalCharge) < 0.0001;
+
+      const totalEquivalents = sumCations + sumAnions;
+
+      // Avoid division by zero for pure water
+      if (totalEquivalents === 0) {
+        cbe.value = 0;
+      } else {
+        cbe.value = ((sumCations - sumAnions) / totalEquivalents) * 100;
+      }
     };
     
-    // Direct mapping of ion names to their HTML representation
-    const ionNameMapping: Record<string, string> = {
-      "Na+": "Na<sup>+</sup>",
-      "K+": "K<sup>+</sup>",
-      "Cl-": "Cl<sup>-</sup>",
-      "Mg+2": "Mg<sup>+2</sup>",
-      "Ca+2": "Ca<sup>+2</sup>",
-      "SO4-2": "SO<sub>4</sub><sup>-2</sup>",
-      "HCO3-": "HCO<sub>3</sub><sup>-</sup>",
-      "CO3-2": "CO<sub>3</sub><sup>-2</sup>"
-    };
-    
-    // Simple function to look up the formatted ion name
-    const formatIonName = (ion: string) => {
-      return ionNameMapping[ion] || ion; // Return mapped value or original if not found
-    };
-    
-    // Water preset handling
+    // Call on mount for initial calculation
+    onMounted(calculateChargeBalance);
+
+    // Computed property to determine alert type and title based on CBE
+    const alertInfo = computed(() => {
+      const absCbe = Math.abs(cbe.value);
+      const title = `Charge balance error: ${cbe.value.toFixed(2)}%`;
+
+      if (absCbe <= ACCEPTABLE_ERROR) {
+        return { type: 'success', title };
+      }
+      if (absCbe <= WARNING_THRESHOLD) {
+        return { type: 'warning', title };
+      }
+      return { type: 'error', title };
+    });
+
     const updateWaterPreset = (preset: string) => {
-      console.log("Updating water preset to:", preset);
-      
       if (preset === "Seawater") {
-        // Update concentrations with seawater values
         store.simulationInput.concentrations["Cl-"] = 0.546;
         store.simulationInput.concentrations["Na+"] = 0.469;
         store.simulationInput.concentrations["Mg+2"] = 0.0528;
         store.simulationInput.concentrations["SO4-2"] = 0.0282;
         store.simulationInput.concentrations["Ca+2"] = 0.0103;
         store.simulationInput.concentrations["K+"] = 0.0102;
-      }
-
-      else if (preset === "Pure water") {
+      } else if (preset === "Pure water") {
         store.simulationInput.concentrations["Cl-"] = 0;
         store.simulationInput.concentrations["Na+"] = 0;
         store.simulationInput.concentrations["Mg+2"] = 0;
@@ -158,6 +171,7 @@ export default defineComponent({
         store.simulationInput.concentrations["Ca+2"] = 0;
         store.simulationInput.concentrations["K+"] = 0;
       }
+      // Recalculate CBE after preset is applied
       calculateChargeBalance();
     };
 
@@ -165,11 +179,12 @@ export default defineComponent({
       store,
       ions,
       presetOptions,
-      formatIonName,
       calculateChargeBalance,
-      isChargeBalanced,
-      chargeSum,
       updateWaterPreset,
+      cbe,
+      alertInfo,
+      ACCEPTABLE_ERROR,
+      concentrationUnitLabel
     };
   },
 });
@@ -191,10 +206,11 @@ export default defineComponent({
   margin-left: 10px;
 }
 
-.ion-label {
-  display: inline-block;
-  width: 65px;
-  margin-right: 5px;
-  text-align: left;
+.cbe-alert {
+  margin-top: 10px;
+}
+
+.el-select-dropdown__item {
+  font-family: 'Roboto' !important;
 }
 </style>

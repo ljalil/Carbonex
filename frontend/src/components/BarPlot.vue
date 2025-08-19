@@ -63,7 +63,7 @@ export default defineComponent({
           type: 'shadow'
         },
         formatter: function(params: any) {
-          const value = params[0].value.toFixed(6);
+          const value = params[0].value.toFixed(4);
           return `${params[0].name}: ${value}`;
         }
       },

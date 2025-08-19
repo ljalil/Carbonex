@@ -30,7 +30,10 @@
         <span class="el-form-item__label unit-label">{{ pressureUnitLabel }}</span>
       </el-form-item>
     </el-form>
+
+    <!--<CO2PhaseDiagram></CO2PhaseDiagram>-->
   </el-card>
+  
 </template>
 
 <script lang="ts">
@@ -43,6 +46,8 @@ import {
   ElInputNumber,
 } from "element-plus";
 
+import CO2PhaseDiagram from "./CO2PhaseDiagram.vue"
+
 export default defineComponent({
   name: "OperationalSettings",
   components: {
@@ -50,6 +55,7 @@ export default defineComponent({
     ElForm,
     ElFormItem,
     ElInputNumber,
+    CO2PhaseDiagram,
   },
   setup() {
     const temperatureUnitLabel = computed(() => {
