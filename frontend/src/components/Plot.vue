@@ -14,13 +14,8 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { LineChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
-
 import { defineComponent, provide, computed } from 'vue';
 import type { PropType } from 'vue';
-import { progressProps } from 'element-plus';
-
-
-
 
 
 // Register required components for ECharts
@@ -38,76 +33,71 @@ provide(THEME_KEY, 'dark');
 
 export default defineComponent({
   name: 'Plot',
-  components: {
-    VChart,
-  },
+  components: { VChart },
   props: {
-    // Use PropType for type safety
     data: {
-      type: Array as PropType<[number, number][]>, // Array of [number, number] pairs
+      type: Array as PropType<[number, number][]>,
       required: true,
     },
-    xAxisLabel: {
-      type: String,
-      default: 'X Axis'
-    },
-    yAxisLabel: {
-      type: String,
-      default: 'Y Axis'
-    },
+    xAxisLabel: { type: String, default: 'X Axis' },
+    yAxisLabel: { type: String, default: 'Y Axis' },
     tooltipLabels: {
-      type: Object as PropType<[string, string]>, // [xLabel, yLabel] for tooltip
-      default: () => ['X', 'Y'] as [string, string]
+      type: Object as PropType<[string, string]>,
+      default: () => ['X', 'Y'] as [string, string],
     },
   },
   setup(props) {
-    // Dynamically compute chart options using props.data
+    // Compute ceiling of the max Y value (or 0 if no data)
+    const yMax = computed(() => {
+      if (props.data.length === 0) return 0;
+      return Math.ceil(Math.max(...props.data.map(point => point[1])));
+    });
+
     const chartOption = computed(() => ({
-      title: {
-        left: 'center',
-      },
+      title: { left: 'center' },
       tooltip: {
         trigger: 'axis',
-        formatter: function(params: any) {
-          // Extract the x and y values from the data point
-          const xValue = params[0].data[0].toFixed(2);
-          const yValue = params[0].data[1].toFixed(4);
-          // Return formatted string with labels
-          return `${props.tooltipLabels[0]}: ${xValue}<br>${props.tooltipLabels[1]}: ${yValue}`;
+        formatter(params: any) {
+          const x = params[0].data[0].toFixed(2);
+          const y = params[0].data[1].toFixed(4);
+          return `${props.tooltipLabels[0]}: ${x}<br>${props.tooltipLabels[1]}: ${y}`;
         }
       },
-      grid: {
-        left: '5%',
-        right: '5%',
-        bottom: '5%',
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'value',
-        name: props.xAxisLabel,
-        nameLocation: 'center',
-        nameGap: 30,
-        min: 'dataMin',
-        max: 'dataMax'
-      },
-      yAxis: {
-        type: 'value',
-        name: props.yAxisLabel,
-        nameLocation: 'center',
-        nameGap: 30,
-      },
+      grid: { left: '5%', right: '5%', bottom: '5%', containLabel: true },
+      xAxis: [
+        {
+          type: 'value', name: props.xAxisLabel, nameLocation: 'center',
+          nameGap: 30, min: 'dataMin', max: 'dataMax',
+          position: 'bottom', axisTicks: { inside: true }
+        },
+        {
+          type: 'value', name: props.xAxisLabel, nameLocation: 'center',
+          nameGap: 30, min: 'dataMin', max: 'dataMax',
+          position: 'top', axisTicks: { inside: true }
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value', name: props.yAxisLabel, nameLocation: 'center',
+          nameGap: 30, min: 0, max: yMax.value,
+          position: 'left', axisTicks: { inside: true }
+        },
+        {
+          type: 'value', name: props.yAxisLabel, nameLocation: 'center',
+          nameGap: 30, min: 0, max: yMax.value,
+          position: 'right', axisTicks: { inside: true }
+        }
+      ],
       series: [
         {
-          data: props.data, // Use the passed prop here
+          data: props.data,
           type: 'line',
           smooth: false,
         },
       ],
     }));
 
-    return {
-      chartOption,
-    };
+    return { chartOption };
   },
 });
 </script>
@@ -124,7 +114,8 @@ export default defineComponent({
   flex: 1;
   height: 100%;
   width: 100%;
-  min-height: 300px; /* Ensure a minimum height */
+  min-height: 300px;
+  /* Ensure a minimum height */
 }
 
 .no-plot {

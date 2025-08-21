@@ -28,7 +28,7 @@ body {
 }
 
 .el-select {
-  width: 120px;
+
 }
 .el-card__header{
   padding: 5px 20px;
@@ -102,4 +102,9 @@ margin: 10px 0;
 
 .el-alert__title {
   line-height: 1.2em;
+}
+
+
+.el-input__inner {
+  font-family: 'Roboto';
 }

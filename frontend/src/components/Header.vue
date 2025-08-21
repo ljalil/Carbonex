@@ -4,9 +4,13 @@
 
     <div id="links-and-controls">
         <a href="#" @click="openAboutDialog">About</a>
-        <el-icon :size="30" :color="color">
-      <Sunny />
-    </el-icon>
+    
+        <el-switch
+    v-model="darkMode"
+    :active-action-icon="Sunny"
+    :inactive-action-icon="Hide"
+    :active-icon="Sunny"
+  />
     </div>
 
 </div>
@@ -53,7 +57,10 @@ import {
   Search,
   Share,
   Upload,
+  Hide,
+  View
 } from "@element-plus/icons-vue";
+import { useDark } from '@vueuse/core';
 
 export default {
   components: {
@@ -65,9 +72,13 @@ export default {
     Search,
     Share,
     Upload,
+    Hide,
+    View
   },
   setup() {
     const aboutDialogVisible = ref(false)
+    
+    const darkMode = useDark()
     
     const openAboutDialog = () => {
       aboutDialogVisible.value = true
@@ -75,7 +86,8 @@ export default {
 
     return {
       aboutDialogVisible,
-      openAboutDialog
+      openAboutDialog,
+      darkMode
     }
   }
 }

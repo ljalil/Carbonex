@@ -1,4 +1,5 @@
 <template>
+  <html >
   <div class="app-container">
     <Header></Header>
     <el-row :gutter="20" class="main-content">
@@ -16,6 +17,7 @@
       </el-col>
     </el-row>
   </div>
+  </html>
 </template>
 <script>
 import axios from "axios";

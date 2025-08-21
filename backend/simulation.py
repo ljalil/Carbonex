@@ -430,13 +430,13 @@ def simulate_varying_pressure_temperature(ion_moles, model):
     Returns dict with grid data suitable for heatmap visualization.
     """
     # Define pressure range: start, end, step (MPa)
-    P_start = 0.1
-    P_end = 100.0
+    P_start = 1
+    P_end = 101.0
     P_step = 1.0
     
     # Define temperature range: start, end, step (K)
     T_start = 273.15  # 0°C
-    T_end = 573.15   # 100°C
+    T_end = 583.15   # 100°C
     T_step = 1.0     # 5K steps
     
     # Generate pressure and temperature arrays

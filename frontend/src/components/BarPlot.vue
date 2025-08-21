@@ -54,7 +54,9 @@ export default defineComponent({
 
   },
   setup(props) {
-    // Dynamically compute chart options using props.data
+  // Species classification for coloring cations and anions
+  const cationSpecies = ['Na+', 'K+', 'Mg+2', 'Ca+2'];
+  // Dynamically compute chart options using props.data
     const chartOption = computed(() => ({
 
       tooltip: {
@@ -99,12 +101,14 @@ export default defineComponent({
       },
       series: [
         {
-          data: props.data.map(item => item.value),
-          type: 'bar',
-          itemStyle: {
-            color: '#409EFF'
-          }
-        },
+          data: props.data.map(item => ({
+            value: item.value,
+            itemStyle: {
+              color: cationSpecies.includes(item.label) ? '#409EFF' : '#FF4D4F'
+            }
+          })),
+          type: 'bar'
+        }
       ],
     }));
 

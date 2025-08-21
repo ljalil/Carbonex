@@ -66,13 +66,13 @@ export default defineComponent({
   setup(props) {
     // Check if we have valid data
     const hasData = computed(() => {
-      return props.data && 
-             props.data.grid_data && 
-             props.data.grid_data.length > 0 &&
-             props.data.temperatures && 
-             props.data.temperatures.length > 0 &&
-             props.data.pressures && 
-             props.data.pressures.length > 0;
+      return props.data &&
+        props.data.grid_data &&
+        props.data.grid_data.length > 0 &&
+        props.data.temperatures &&
+        props.data.temperatures.length > 0 &&
+        props.data.pressures &&
+        props.data.pressures.length > 0;
     });
 
     // Dynamically compute chart options
@@ -95,13 +95,11 @@ export default defineComponent({
           text: props.title,
           left: 'center',
           show: false,
-          textStyle: {
-            color: '#ffffff'
-          }
+
         },
         tooltip: {
           position: 'top',
-          formatter: function(params: any) {
+          formatter: function (params: any) {
             const tempIndex = params.data[0];
             const pressureIndex = params.data[1];
             const solubility = params.data[2];
@@ -123,12 +121,7 @@ export default defineComponent({
           name: 'Temperature (K)',
           nameLocation: 'center',
           nameGap: 30,
-          axisLabel: {
-            color: '#000000'
-          },
-          nameTextStyle: {
-            color: '#000000'
-          }
+
         },
         yAxis: {
           type: 'category',
@@ -136,12 +129,10 @@ export default defineComponent({
           name: props.yAxisLabel,
           nameLocation: 'center',
           nameGap: 50,
-          axisLabel: {
-            color: '#000000'
-          },
-          nameTextStyle: {
-            color: '#000000'
-          }
+          min: 0,
+          max: 100,
+          splitNumber: 20,
+
         },
         visualMap: {
           min: minValue,
@@ -165,9 +156,7 @@ export default defineComponent({
               '#a50026'
             ]
           },
-          textStyle: {
-            color: '#000000'
-          }
+
         },
         series: [
           {
@@ -176,7 +165,7 @@ export default defineComponent({
             data: props.data.grid_data,
             emphasis: {
               itemStyle: {
-                borderColor: '#333',
+
                 borderWidth: 1
               }
             },
@@ -215,7 +204,8 @@ export default defineComponent({
   flex: 1;
   height: 100%;
   width: 100%;
-  min-height: 300px; /* Ensure a minimum height */
+  min-height: 300px;
+  /* Ensure a minimum height */
 }
 
 .no-data {
@@ -226,7 +216,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #666;
+
   font-size: 16px;
 }
 </style>
