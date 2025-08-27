@@ -1,10 +1,5 @@
 <template>
-  <el-card class="sidebar-card" shadow="never">
-    <template #header>
-      <div class="card-header">
-        <span>Units settings</span>
-      </div>
-    </template>
+
 
     <el-form label-position="left" label-width="90px">
       <el-form-item label="Temperature">
@@ -53,7 +48,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-  </el-card>
+
 </template>
 
 <script lang="ts">

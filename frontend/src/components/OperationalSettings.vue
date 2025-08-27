@@ -1,5 +1,5 @@
 <template>
-  <el-card class="operational-card">
+  <el-card class="operational-card" shadow="never">
     <template #header>
       <div class="card-header">
         <span>Pressure and Temperature</span>
@@ -32,6 +32,10 @@
     </el-form>
 
     <!--<CO2PhaseDiagram></CO2PhaseDiagram>-->
+
+       <template #footer>
+    <el-text >Phase: Supercritical</el-text>
+    </template>
   </el-card>
   
 </template>

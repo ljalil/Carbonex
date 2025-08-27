@@ -7,7 +7,7 @@
     </template>
 
     <el-form label-position="left" label-width="90px">
-      <el-form-item label="Model">
+      <el-form-item label="Main model">
         <el-select
           size="small"
           v-model="store.simulationInput.model"
@@ -22,6 +22,8 @@
           ></el-option>
         </el-select>
       </el-form-item>
+
+      
     </el-form>
   </el-card>
 </template>

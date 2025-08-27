@@ -3,14 +3,16 @@
     <h1>Carbonex  <span class="subtext">A simulator for CO<sub>2</sub> dissolution in formation water.</span></h1>
 
     <div id="links-and-controls">
-        <a href="#" @click="openAboutDialog">About</a>
+        
     
         <el-switch
     v-model="darkMode"
-    :active-action-icon="Sunny"
-    :inactive-action-icon="Hide"
-    :active-icon="Sunny"
+    
+    :active-icon="Moon"
+    :inactive-icon="Sunny"
   />
+
+  <a href="#" @click="openAboutDialog">About</a>
     </div>
 
 </div>
@@ -46,10 +48,11 @@
   </el-dialog>
 </template>
 
-<script>
+<script >
 import { ref } from 'vue'
 import {
   Sunny,
+  Moon,
   Delete,
   Edit,
   Eleme,
@@ -58,13 +61,15 @@ import {
   Share,
   Upload,
   Hide,
-  View
+  View,
+  Check
 } from "@element-plus/icons-vue";
 import { useDark } from '@vueuse/core';
 
 export default {
   components: {
     Sunny,
+    Moon,
     Delete,
     Edit,
     Eleme,
@@ -73,7 +78,8 @@ export default {
     Share,
     Upload,
     Hide,
-    View
+    View,
+    Check
   },
   setup() {
     const aboutDialogVisible = ref(false)
@@ -87,7 +93,10 @@ export default {
     return {
       aboutDialogVisible,
       openAboutDialog,
-      darkMode
+      darkMode,
+      Check,
+      Sunny,
+      Moon
     }
   }
 }
@@ -107,18 +116,21 @@ h1 {
     justify-content: space-between;
     margin-bottom: 10px;
     padding: 0 10px 0 10px;
+    background-color: var(--el-bg-color-overlay);
+    border-bottom: 1px solid var(--el-border-color);
 
 }
 
 #links-and-controls{
     display: flex;
     align-items: center;
+    gap: 20px;
 }
 
 a {
     margin-right: 10px;
     text-decoration: none;
-    color: black;
+    color: var(--el-text-color-regular);
     cursor: pointer;
 }
 

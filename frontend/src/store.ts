@@ -40,6 +40,7 @@ export type PressureUnit = 'bar' | 'atm' | 'psi' | 'mpa';
 // Available concentration units for input/output
 export type ConcentrationUnit = 'mol/kg' | 'mol/L' | 'ppm';
 export type ModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
+export type CorrosionModelType = 'deWaald1991' | 'deWaald1995';
 
 interface SimulationInput {
   temperature: number; // Always stored in Kelvin (backend compatible)
@@ -47,6 +48,7 @@ interface SimulationInput {
   concentrations: Concentrations;
   preset?: string;
   model: ModelType;
+  corrosionModel: CorrosionModelType;
 }
 
 interface UnitPreferences {
@@ -74,6 +76,7 @@ export const store = reactive<{
         "CO3-2": 0
     },
     model: 'duan_sun_2006', // Default model
+    corrosionModel: 'deWaald1991',
   },
   simulationOutput: {
     total_dissolved_co2: 0,

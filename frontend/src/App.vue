@@ -1,21 +1,24 @@
 <template>
   <html >
-  <div class="app-container">
-    <Header></Header>
-    <el-row :gutter="20" class="main-content">
-      <el-col :span="5">
+  <div class="common-layout">
+    <el-container>
+    <el-header><Header></Header></el-header>
+    <el-container>
+    <el-aside width="22%">
         <Sidebar></Sidebar>
-      </el-col>
-      <el-col :span="14" class="center-column">
+        </el-aside>
+      <el-main>
         <div class="center-content">
           <ActionBar></ActionBar>
           <TabsContainer></TabsContainer>
         </div>
-      </el-col>
-      <el-col :span="5">
+        </el-main>
+        <el-aside width="22%">
         <SimulationInfo></SimulationInfo>
-      </el-col>
-    </el-row>
+        </el-aside>
+
+    </el-container>
+    </el-container>
   </div>
   </html>
 </template>

@@ -3,8 +3,9 @@
     <div v-if="hasData" class="chart-wrapper">
       <v-chart class="chart" :option="chartOption" autoresize />
     </div>
-    <div v-else class="no-data">
-      <p>No heatmap data available. Run a simulation to generate data.</p>
+    <div class="no-plot" v-else>
+      <h2>No data to display</h2>
+      <p>Run simulation to display the resulting plots.</p>
     </div>
   </div>
 </template>
@@ -208,7 +209,7 @@ export default defineComponent({
   /* Ensure a minimum height */
 }
 
-.no-data {
+.no-plot {
   flex: 1;
   height: 100%;
   display: flex;
@@ -216,7 +217,5 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   text-align: center;
-
-  font-size: 16px;
 }
 </style>

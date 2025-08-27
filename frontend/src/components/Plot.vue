@@ -114,8 +114,8 @@ export default defineComponent({
   flex: 1;
   height: 100%;
   width: 100%;
-  min-height: 300px;
-  /* Ensure a minimum height */
+  display: flex;
+  flex-direction: column;
 }
 
 .no-plot {

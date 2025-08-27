@@ -39,7 +39,7 @@
     </el-form>
 
 
-        
+        <template #footer>
     <el-alert
       :title="alertInfo.title"
       :type="alertInfo.type"
@@ -49,6 +49,7 @@
       class="cbe-alert"
     >
     </el-alert>
+    </template>
   
   </el-card>
 </template>

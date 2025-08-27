@@ -68,9 +68,9 @@ body {
   font-size: .7em;
 }
 
-.el-card, .el-table{
+.el-card, .el-table, .el-tabs{
   margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+
 }
 
 .el-table .el-table__cell {
@@ -96,8 +96,8 @@ margin: 10px 0;
 }
 
 .el-alert {
-  padding: 4px 16px;
-  margin-top: 8px;
+  padding: 4px 8px;
+  margin-top: 0px !important;
 }
 
 .el-alert__title {
@@ -107,4 +107,29 @@ margin: 10px 0;
 
 .el-input__inner {
   font-family: 'Roboto';
+}
+
+.el-header {
+  padding: 0;
+}
+
+aside {
+  padding: 0 10px;
+
+}
+
+.el-aside {
+    overflow: clip !important;
+}
+
+.el-main {
+  padding: 0 10px;
+}
+
+.el-container {
+  height: 100vh;
+}
+
+.el-card__footer {
+  padding: 10px 20px;
 }
