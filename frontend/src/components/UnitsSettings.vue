@@ -51,68 +51,46 @@
 
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import { store, type TemperatureUnit, type PressureUnit, type ConcentrationUnit } from "../store";
-import {
-  ElCard,
-  ElForm,
-  ElFormItem,
-  ElSelect,
-  ElOption,
-} from "element-plus";
+import { ElForm, ElFormItem, ElSelect, ElOption } from "element-plus";
 
-export default defineComponent({
-  name: "UnitsSettings",
-  components: {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-  },
-  emits: ['temperature-unit-changed', 'pressure-unit-changed', 'concentration-unit-changed'],
-  setup(props, { emit }) {
-    const temperatureUnits = [
-      { label: 'Kelvin (K)', value: 'kelvin' as TemperatureUnit },
-      { label: 'Celsius (°C)', value: 'celsius' as TemperatureUnit },
-      { label: 'Fahrenheit (°F)', value: 'fahrenheit' as TemperatureUnit }
-    ];
+const emit = defineEmits([
+  'temperature-unit-changed',
+  'pressure-unit-changed',
+  'concentration-unit-changed'
+] as const);
 
-    const pressureUnits = [
-      { label: 'Megapascal (MPa)', value: 'mpa' as PressureUnit },
-      { label: 'Bar', value: 'bar' as PressureUnit },
-      { label: 'Atmosphere (atm)', value: 'atm' as PressureUnit },
-      { label: 'PSI', value: 'psi' as PressureUnit }
-    ];
-    const concentrationUnits: { label: string; value: ConcentrationUnit }[] = [
-      { label: 'mol/kg', value: 'mol/kg' },
-      { label: 'mol/L', value: 'mol/L' },
-      { label: 'ppm', value: 'ppm' }
-    ];
+const temperatureUnits = [
+  { label: 'Kelvin (K)', value: 'kelvin' as TemperatureUnit },
+  { label: 'Celsius (°C)', value: 'celsius' as TemperatureUnit },
+  { label: 'Fahrenheit (°F)', value: 'fahrenheit' as TemperatureUnit }
+];
 
-    const updateTemperatureUnit = () => {
-      emit('temperature-unit-changed');
-    };
+const pressureUnits = [
+  { label: 'Megapascal (MPa)', value: 'mpa' as PressureUnit },
+  { label: 'Bar', value: 'bar' as PressureUnit },
+  { label: 'Atmosphere (atm)', value: 'atm' as PressureUnit },
+  { label: 'PSI', value: 'psi' as PressureUnit }
+];
 
-    const updatePressureUnit = () => {
-      emit('pressure-unit-changed');
-    };
-    const updateConcentrationUnit = () => {
-      emit('concentration-unit-changed');
-    };
+const concentrationUnits: { label: string; value: ConcentrationUnit }[] = [
+  { label: 'mol/kg', value: 'mol/kg' },
+  { label: 'mol/L', value: 'mol/L' },
+  { label: 'ppm', value: 'ppm' }
+];
 
-    return {
-      store,
-      temperatureUnits,
-      pressureUnits,
-      concentrationUnits,
-      updateTemperatureUnit,
-      updatePressureUnit,
-      updateConcentrationUnit,
-    };
-  },
-});
+function updateTemperatureUnit() {
+  emit('temperature-unit-changed');
+}
+
+function updatePressureUnit() {
+  emit('pressure-unit-changed');
+}
+
+function updateConcentrationUnit() {
+  emit('concentration-unit-changed');
+}
 </script>
 
 <style scoped>

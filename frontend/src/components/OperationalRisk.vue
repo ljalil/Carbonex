@@ -21,7 +21,7 @@
       </el-form-item>
 
       <el-text>Corrosion rate: </el-text>
-      <el-text type="primary" tag="b">0.3 mm/year</el-text>
+      <el-text type="primary" tag="b">{{ formatCorrosionRate }}  mm/year</el-text>
 
       
     </el-form>
@@ -31,38 +31,23 @@
 
   </template>
   
-  <script lang="ts">
-  import { defineComponent } from "vue";
-  import { store } from "../store";
-  import {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-  } from "element-plus";
-  
-  export default defineComponent({
-    name: "OperationalRisk",
-    components: {
-      ElCard,
-      ElForm,
-      ElFormItem,
-      ElSelect,
-      ElOption,
-    },
-    setup() {
-      const modelOptions = [
-        { label: 'de Waard (1991)', value: 'deWaald1991' },
-        { label: 'de Waard (1995)', value: 'deWaald1995' }
-      ];
+  <script setup lang="ts">
+  import { computed } from 'vue'
+  import { store } from '../store'
 
-      return {
-        store,
-        modelOptions,
-      };
-    },
-    });
+  // Corrosion models
+  const modelOptions = [
+    { label: 'de Waard (1991)', value: 'deWaald1991' },
+    { label: 'de Waard (1995)', value: 'deWaald1995' }
+  ]
+  const simulationOutput = computed(() => store.simulationOutput)
+  const formatCorrosionRate = computed(() => {
+    const T = store.simulationInput.temperature
+    const pCO2 = simulationOutput.value.partial_pressure_co2
+    if (!pCO2 || pCO2 <= 0 || !T) return 'N/A'
+    const rate = Math.pow(10, 5.8 - 1710/T + 0.67 * Math.log10(pCO2 * 1.01325))
+    return rate.toFixed(4)
+  })
   </script>
   
   <style scoped>

@@ -5,10 +5,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'Home',
-});
+<script setup lang="ts">
+// Home view has no reactive logic yet
 </script>

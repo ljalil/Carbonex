@@ -7,34 +7,19 @@
     </template>
 
     <div class="simulation-properties-card">
-      <el-text v-if="displayCO2Value" type="primary" size="large" class="total-dissolved-co2">{{ formatCO2Value }} mol/kg</el-text>
+      <el-text v-if="displayCO2Value" type="primary" tag="b" size="large" class="total-dissolved-co2">{{ formatCO2Value }} mol/kg</el-text>
       <el-text v-else size="large" class="total-dissolved-co2 no-data">N/A</el-text>
     </div>
   </el-card>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed } from "vue";
-import { store } from "../store";
-import { ElCard } from "element-plus";
+<script setup lang="ts">
+import { computed } from 'vue'
+import { store } from '../store'
 
-export default defineComponent({
-  name: "TotalDissolvedCO2Card",
-  components: {
-    ElCard,
-  },
-  setup() {
-    const simulationOutput = computed(() => store.simulationOutput);
-    
-    const displayCO2Value = computed(() => simulationOutput.value.total_dissolved_co2 != 0);
-    const formatCO2Value = computed(() => simulationOutput.value.total_dissolved_co2?.toFixed(4) || "N/A");
-
-    return {
-      displayCO2Value,
-      formatCO2Value,
-    };
-  },
-});
+const simulationOutput = computed(() => store.simulationOutput)
+const displayCO2Value = computed(() => simulationOutput.value.total_dissolved_co2 != 0)
+const formatCO2Value = computed(() => simulationOutput.value.total_dissolved_co2?.toFixed(4) || 'N/A')
 </script>
 
 <style scoped>

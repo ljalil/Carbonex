@@ -49,15 +49,25 @@ export async function runSimulation() {
       payload
     );
 
-    const responseData = response.data.data;
+    console.log("Full API response:", response.data);
 
-    // CORRECT: Update each property on the existing reactive object
-    store.simulationOutput.density = parseFloat(responseData.density || 0);
-    store.simulationOutput.ionic_strength = parseFloat(responseData.ionic_strength || 0);
-    store.simulationOutput.pH = parseFloat(responseData.pH || 0);
-    store.simulationOutput.activity_of_water = parseFloat(responseData.activity_of_water || 0);
-    store.simulationOutput.osmotic_coefficient = parseFloat(responseData.osmotic_coefficient || 0);
-    store.simulationOutput.speciesData = responseData.species_data || [];
+    // Check if the response has the expected structure
+    if (response.data.status === "success" && response.data.data) {
+      const responseData = response.data.data;
+
+      // CORRECT: Update each property on the existing reactive object
+      store.simulationOutput.density = parseFloat(responseData.density || 0);
+      store.simulationOutput.ionic_strength = parseFloat(responseData.ionic_strength || 0);
+      store.simulationOutput.pH = parseFloat(responseData.pH || 0);
+      store.simulationOutput.activity_of_water = parseFloat(responseData.activity_of_water || 0);
+      store.simulationOutput.osmotic_coefficient = parseFloat(responseData.osmotic_coefficient || 0);
+      store.simulationOutput.fugacity_co2 = parseFloat(responseData.fugacity_co2 || 0);
+      store.simulationOutput.partial_pressure_co2 = parseFloat(responseData.partial_pressure_co2 || 0);
+      store.simulationOutput.speciesData = responseData.species_data || [];
+    } else {
+      console.error("API returned error or unexpected structure:", response.data);
+      throw new Error(`API Error: ${response.data.message || "Unknown error"}`);
+    }
     
     // IMPORTANT: Do NOT touch plotDataPressure or plotDataTemperature here, as this endpoint doesn't provide them.
 
@@ -69,6 +79,8 @@ export async function runSimulation() {
     store.simulationOutput.pH = 0;
     store.simulationOutput.activity_of_water = 0;
     store.simulationOutput.osmotic_coefficient = 0;
+    store.simulationOutput.fugacity_co2 = 0;
+    store.simulationOutput.partial_pressure_co2 = 0;
     store.simulationOutput.speciesData = [];
     // Do not reset plotDataPressure, plotDataTemperature or total_dissolved_co2 on this specific error
   }

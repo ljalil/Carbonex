@@ -1,6 +1,6 @@
 <template>
     <div id="header">
-    <h1>Carbonex  <span class="subtext">A simulator for CO<sub>2</sub> dissolution in formation water.</span></h1>
+    <h1>Carbonex <el-text>A simulator for CO<sub>2</sub> dissolution in formation water.</el-text></h1>
 
     <div id="links-and-controls">
         

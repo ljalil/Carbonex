@@ -21,7 +21,7 @@ import { defineComponent, provide, computed } from 'vue';
 import type { PropType } from 'vue';
 
 // Define types for heatmap data
-interface HeatmapData {
+export interface HeatmapData {
   grid_data: [number, number, number][]; // [temp_index, pressure_index, CO2_solubility]
   temperatures: number[]; // Temperature values in Kelvin
   pressures: number[]; // Pressure values in MPa

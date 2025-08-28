@@ -1,48 +1,37 @@
 <template>
-  <ModelSelection />
-  <!-- <UnitsSettings 
-  @temperature-unit-changed="updateTemperatureUnit"
-  @pressure-unit-changed="updatePressureUnit"
-  /> -->
-  <OperationalSettings />
-  <WaterChemistry />
-  
+  <div class="sidebar-content">
+    <ModelSelection />
+    <!-- <UnitsSettings 
+    @temperature-unit-changed="updateTemperatureUnit"
+    @pressure-unit-changed="updatePressureUnit"
+    /> -->
+    <OperationalSettings />
+    <WaterChemistry />
+    <StreamImpurities />
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import ModelSelection from "./ModelSelection.vue";
-import UnitsSettings from "./UnitsSettings.vue";
-import WaterChemistry from "./WaterChemistry.vue";
-import OperationalSettings from "./OperationalSettings.vue";
+<script setup lang="ts">
+import ModelSelection from './ModelSelection.vue'
+import UnitsSettings from './UnitsSettings.vue'
+import WaterChemistry from './WaterChemistry.vue'
+import OperationalSettings from './OperationalSettings.vue'
+import StreamImpurities from './StreamImpurities.vue'
 
-export default defineComponent({
-  name: "Sidebar",
-  components: {
-    ModelSelection,
-    UnitsSettings,
-    WaterChemistry,
-    OperationalSettings,
-  },
-  setup() {
-    const updateTemperatureUnit = () => {
-      // This can be used to sync any additional state if needed
-      console.log("Temperature unit updated");
-    };
+// Handle unit change events
+const updateTemperatureUnit = () => {
+  console.log('Temperature unit updated')
+}
 
-    const updatePressureUnit = () => {
-      // This can be used to sync any additional state if needed
-      console.log("Pressure unit updated");
-    };
-
-    return {
-      updateTemperatureUnit,
-      updatePressureUnit,
-    };
-  },
-});
+const updatePressureUnit = () => {
+  console.log('Pressure unit updated')
+}
 </script>
 
 <style scoped>
-/* Global sidebar styles can be added here if needed */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+
+}
 </style>

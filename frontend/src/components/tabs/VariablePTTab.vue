@@ -9,21 +9,24 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import HeatMap from '../HeatMap.vue';
+import type { HeatmapData } from '../HeatMap.vue';
 import { store } from '../../store';
 
-export default {
+export default defineComponent({
   name: 'VariablePTTab',
-  components: { 
-    HeatMap 
+  components: {
+    HeatMap,
   },
-  data() {
+  setup() {
+    // simulationOutput.heatmapData is of type HeatmapData
     return {
-      store
+      store,
     };
   }
-}
+});
 </script>
 
 <style scoped>

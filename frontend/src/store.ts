@@ -11,6 +11,13 @@ interface Concentrations {
     "CO3-2": number;
 }
 
+interface StreamImpurities {
+    "CO2": number;
+    "O2": number;
+    "H2S": number;
+    "Hydrogen": number;
+}
+
 interface SpeciesData {
   species: string;
   activity: number;
@@ -24,6 +31,8 @@ interface SimulationOutput {
   pH: number;
   activity_of_water: number;
   osmotic_coefficient: number;
+  fugacity_co2: number;
+  partial_pressure_co2: number;
   speciesData: SpeciesData[];
   plotDataPressure: [number, number][]; // Array of [pressure, CO2] pairs for variable pressure plot
   plotDataTemperature: [number, number][]; // Array of [temperature, CO2] pairs for variable temperature plot
@@ -49,6 +58,8 @@ interface SimulationInput {
   preset?: string;
   model: ModelType;
   corrosionModel: CorrosionModelType;
+  considerImpurities: boolean;
+  streamImpurities: StreamImpurities;
 }
 
 interface UnitPreferences {
@@ -77,6 +88,13 @@ export const store = reactive<{
     },
     model: 'duan_sun_2006', // Default model
     corrosionModel: 'deWaald1991',
+    considerImpurities: false,
+    streamImpurities: {
+        "CO2": 1,
+        "O2": 0,
+        "H2S": 0,
+        "Hydrogen": 0
+    },
   },
   simulationOutput: {
     total_dissolved_co2: 0,
@@ -85,6 +103,8 @@ export const store = reactive<{
     pH: 0,
     activity_of_water: 0,
     osmotic_coefficient: 0,
+    fugacity_co2: 0,
+    partial_pressure_co2: 0,
     speciesData: [
       { species: "Na+", activity: 0, molar_volume: 0 },
       { species: "Cl-", activity: 0, molar_volume: 0 },

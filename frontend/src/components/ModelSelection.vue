@@ -12,7 +12,7 @@
           size="small"
           v-model="store.simulationInput.model"
           placeholder="Select model"
-
+          style="width: 100%"
         >
           <el-option
             v-for="option in modelOptions"
@@ -28,40 +28,17 @@
   </el-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { store } from "../store";
-import {
-  ElCard,
-  ElForm,
-  ElFormItem,
-  ElSelect,
-  ElOption,
-} from "element-plus";
+<script setup lang="ts">
+import { store } from '../store'
+import { ElCard, ElForm, ElFormItem, ElSelect, ElOption } from 'element-plus'
 
-export default defineComponent({
-  name: "ModelSelection",
-  components: {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-  },
-  setup() {
-    const modelOptions = [
-      { label: 'Carbonex', value: 'carbonex' },
-      { label: 'PHREEQC (phreeqc.dat)', value: 'phreeqc_phreeqc' },
-      { label: 'PHREEQC (pitzer.dat)', value: 'phreeqc_pitzer' },
-      { label: 'Duan and Sun (2006)', value: 'duan_sun_2006' }
-    ];
-
-    return {
-      store,
-      modelOptions,
-    };
-  },
-});
+// Available simulation models
+const modelOptions = [
+  { label: 'Carbonex', value: 'carbonex' },
+  { label: 'PHREEQC (phreeqc.dat)', value: 'phreeqc_phreeqc' },
+  { label: 'PHREEQC (pitzer.dat)', value: 'phreeqc_pitzer' },
+  { label: 'Duan and Sun (2006)', value: 'duan_sun_2006' }
+]
 </script>
 
 <style scoped>

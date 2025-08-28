@@ -32,7 +32,7 @@ def get_solution_properties(temperature, pressure, species):
     phreeqc_code += f'\t-volume 1.0\n\t CO2(g) {p_co2}\n\tH2O(g) {p_h2o}\n'
     phreeqc_code +=  f'''
 USER_PUNCH
-    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC
+    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC PR_CO2 PHI_CO2
     -start
     10 PUNCH VM("Na+")
     20 PUNCH VM("Cl-")
@@ -44,6 +44,8 @@ USER_PUNCH
     80 PUNCH VM("CO3-2")
     90 PUNCH RHO
     100 PUNCH OSMOTIC
+    110 PUNCH PR_P("CO2(g)")
+    120 PUNCH PR_PHI("CO2(g)")
     -end
 
 SELECTED_OUTPUT
@@ -120,6 +122,8 @@ END'''
         ionic_strength = float(results.get('mu', 0))
         ph = float(results.get('pH', 7.0))
         osmotic_coefficient = float(results.get('OSMOTIC', 0))
+        partial_pressure_co2 = float(results.get('PR_CO2', 0))
+        fugacity_co2 = float(results.get('PHI_CO2', 0))
 
     except (ValueError, TypeError):
         density = 0
@@ -127,9 +131,8 @@ END'''
         ph = 7.0
         osmotic_coefficient = 0
         
-    activity_of_water = 3.5  # Fixed value as in original code
-    
-    return species_data, density, ionic_strength, ph, activity_of_water, osmotic_coefficient
+
+    return species_data, density, ionic_strength, ph, osmotic_coefficient, partial_pressure_co2, fugacity_co2
 
 def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
     database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'

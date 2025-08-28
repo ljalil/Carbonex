@@ -41,58 +41,27 @@
   </el-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { store, type TemperatureUnit, type PressureUnit } from "../store";
-import {
-  ElCard,
-  ElForm,
-  ElFormItem,
-  ElSelect,
-  ElOption,
-} from "element-plus";
+<script setup lang="ts">
+import { store, type TemperatureUnit, type PressureUnit } from '../store'
+const emit = defineEmits<{
+  (e: 'temperature-unit-changed'): void
+  (e: 'pressure-unit-changed'): void
+}>()
 
-export default defineComponent({
-  name: "Units",
-  components: {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-  },
-  emits: ['temperature-unit-changed', 'pressure-unit-changed'],
-  setup(props, { emit }) {
-    const temperatureUnits = [
-      { label: 'Kelvin (K)', value: 'kelvin' as TemperatureUnit },
-      { label: 'Celsius (°C)', value: 'celsius' as TemperatureUnit },
-      { label: 'Fahrenheit (°F)', value: 'fahrenheit' as TemperatureUnit }
-    ];
+const temperatureUnits = [
+  { label: 'Kelvin (K)', value: 'kelvin' as TemperatureUnit },
+  { label: 'Celsius (°C)', value: 'celsius' as TemperatureUnit },
+  { label: 'Fahrenheit (°F)', value: 'fahrenheit' as TemperatureUnit }
+]
+const pressureUnits = [
+  { label: 'Megapascal (MPa)', value: 'mpa' as PressureUnit },
+  { label: 'Bar', value: 'bar' as PressureUnit },
+  { label: 'Atmosphere (atm)', value: 'atm' as PressureUnit },
+  { label: 'PSI', value: 'psi' as PressureUnit }
+]
 
-    const pressureUnits = [
-      { label: 'Megapascal (MPa)', value: 'mpa' as PressureUnit },
-      { label: 'Bar', value: 'bar' as PressureUnit },
-      { label: 'Atmosphere (atm)', value: 'atm' as PressureUnit },
-      { label: 'PSI', value: 'psi' as PressureUnit }
-    ];
-
-    const updateTemperatureUnit = () => {
-      emit('temperature-unit-changed');
-    };
-
-    const updatePressureUnit = () => {
-      emit('pressure-unit-changed');
-    };
-
-    return {
-      store,
-      temperatureUnits,
-      pressureUnits,
-      updateTemperatureUnit,
-      updatePressureUnit,
-    };
-  },
-});
+const updateTemperatureUnit = () => emit('temperature-unit-changed')
+const updatePressureUnit = () => emit('pressure-unit-changed')
 </script>
 
 <style scoped>

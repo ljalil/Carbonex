@@ -23,39 +23,27 @@
   </div>
 </template>
   
-  <script lang="ts" >
+  <script setup lang="ts" >
   import { CaretRight } from "@element-plus/icons-vue";
   import { runSimulation, runSimulationWithVaryingPressure, runSimulationWithVaryingTemperature, runSimulationWithVaryingPressureTemperature, runStaticSimulation } from "../actions"; // Added import for heatmap function
-  import { ref } from 'vue'
+  import { ref, defineEmits } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import UnitsSettings from "./UnitsSettings.vue";
 
-  export default {
-    name: "ActionBar",
-    components: {
-      UnitsSettings
-    },
-    setup(props, { emit }) {
-      const dialogVisible = ref(false);
-
-
-
-      const handleRunSimulationClicked = () => {
-        runStaticSimulation(); // Call the new function to get dissolved CO2
-        runSimulation(); // Call the function to get all other properties
-        runSimulationWithVaryingPressure(); // Call this to update the pressure vs. CO2 plot
-        runSimulationWithVaryingTemperature(); // Call this to update the temperature vs. CO2 plot
-        runSimulationWithVaryingPressureTemperature(); // Call this to update the heatmap
-        emit("run-simulation-clicked"); // Emit a custom event if needed
-      };
-
-      return {
-        dialogVisible,
-        handleRunSimulationClicked,
-        CaretRight
-      }
-    }
-  };
+  const emit = defineEmits<{
+    (e: 'run-simulation-clicked'): void
+  }>()
+  
+  const dialogVisible = ref(false)
+  
+  const handleRunSimulationClicked = () => {
+    runStaticSimulation()
+    runSimulation()
+    runSimulationWithVaryingPressure()
+    runSimulationWithVaryingTemperature()
+    runSimulationWithVaryingPressureTemperature()
+    emit('run-simulation-clicked')
+  }
   </script>
   
   <style scoped>

@@ -24,15 +24,17 @@ def simulate_solution_properties():
 
         
 
-        species_data, density, ionic_strength, ph, activity_of_water, osmotic_coefficient = get_solution_properties(temperature=temperature, pressure=pressure, species=concentrations)
+        species_data, density, ionic_strength, ph, osmotic_coefficient, partial_pressure_co2, fugacity_co2 = get_solution_properties(temperature=temperature, pressure=pressure, species=concentrations)
 
         response_data = {
             "density": density,
             "ionic_strength": ionic_strength,
             "pH": ph,
-            "activity_of_water": activity_of_water,
+            "activity_of_water": 0.0,  # Set default value since it's not returned by the function
             "osmotic_coefficient": osmotic_coefficient,
             "species_data": species_data,
+            "partial_pressure_co2": partial_pressure_co2,
+            "fugacity_co2": fugacity_co2
         }
 
         return jsonify({

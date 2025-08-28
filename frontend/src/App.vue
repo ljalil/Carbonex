@@ -4,16 +4,18 @@
     <el-container>
     <el-header><Header></Header></el-header>
     <el-container>
-    <el-aside width="22%">
+    <el-aside width="20%" class="sidebar-container">
+      <el-scrollbar height="100%">
         <Sidebar></Sidebar>
-        </el-aside>
+      </el-scrollbar>
+    </el-aside>
       <el-main>
         <div class="center-content">
           <ActionBar></ActionBar>
           <TabsContainer></TabsContainer>
         </div>
         </el-main>
-        <el-aside width="22%">
+        <el-aside width="25%">
         <SimulationInfo></SimulationInfo>
         </el-aside>
 
@@ -22,29 +24,17 @@
   </div>
   </html>
 </template>
-<script>
-import axios from "axios";
-import { ElButton } from 'element-plus'
+<script setup lang="ts">
+import { computed } from 'vue'
 import Sidebar from './components/Sidebar.vue'
-import SimulationInfo from './components/SimulationInfo.vue';
-import Header from './components/Header.vue';
-import ActionBar from './components/ActionBar.vue';
-import TabsContainer from './components/TabsContainer.vue';
-import { store } from './store';
+import SimulationInfo from './components/SimulationInfo.vue'
+import Header from './components/Header.vue'
+import ActionBar from './components/ActionBar.vue'
+import TabsContainer from './components/TabsContainer.vue'
+import { store } from './store'
 
-export default {
-  components: { ElButton, Header, Sidebar, SimulationInfo, ActionBar, TabsContainer },
-  data() {
-    return {
-      store
-    };
-  },
-  computed: {
-    simulationOutput() {
-      return store.simulationOutput;
-    }
-  }
-}
+// Reactive getters
+const simulationOutput = computed(() => store.simulationOutput)
 </script>
 
 <style scoped>
@@ -74,5 +64,17 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-container {
+  height: calc(100vh - 60px); /* Adjust based on header height */
+}
+
+.sidebar-container .el-scrollbar {
+  height: 100%;
+}
+
+.sidebar-content {
+  padding-right: 15px;
 }
 </style>
