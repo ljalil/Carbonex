@@ -6,8 +6,9 @@
     @pressure-unit-changed="updatePressureUnit"
     /> -->
     <OperationalSettings />
-    <WaterChemistry />
-    <StreamImpurities />
+  <WaterChemistry />
+  <FormationMineralogy />
+  <StreamImpurities />
   </div>
 </template>
 
@@ -15,6 +16,7 @@
 import ModelSelection from './ModelSelection.vue'
 import UnitsSettings from './UnitsSettings.vue'
 import WaterChemistry from './WaterChemistry.vue'
+import FormationMineralogy from './FormationMineralogy.vue'
 import OperationalSettings from './OperationalSettings.vue'
 import StreamImpurities from './StreamImpurities.vue'
 

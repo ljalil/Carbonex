@@ -54,9 +54,6 @@ export default defineComponent({
 
   },
   setup(props) {
-  // Species classification for coloring cations and anions
-  const cationSpecies = ['Na+', 'K+', 'Mg+2', 'Ca+2'];
-  // Dynamically compute chart options using props.data
     const chartOption = computed(() => ({
 
       tooltip: {
@@ -72,42 +69,35 @@ export default defineComponent({
       grid: {
         left: '5%',
         right: '5%',
-        bottom: '10%',
-        top: '15%',
+        bottom: '15%',
+        top: '5%',
         containLabel: true,
       },
-      // Configure horizontal bar orientation by swapping axes
+      // Configure vertical bar orientation with category x-axis and value y-axis
       xAxis: {
-        type: 'value',
+        type: 'category',
+        data: props.data.map(item => item.label),
         name: props.xAxisLabel,
+        nameLocation: 'center',
+        nameGap: 30,
+        axisTick: { alignWithLabel: true },
+        axisLabel: {
+          interval: 0,
+          formatter: (value: string) => value
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: props.yAxisLabel,
         nameLocation: 'center',
         nameGap: 30,
         min: 'dataMin',
       },
-      yAxis: {
-        type: 'category',
-        data: props.data.map(item => item.label),
-        name: props.yAxisLabel,
-        nameLocation: 'center',
-        nameGap: 50,
-        axisTick: {
-        alignWithLabel: true
-      },
-        axisLabel: {
-          formatter: function(value: string) {
-            return value;
-          }
-        }
-      },
       series: [
         {
-          data: props.data.map(item => ({
-            value: item.value,
-            itemStyle: {
-              color: cationSpecies.includes(item.label) ? '#409EFF' : '#FF4D4F'
-            }
-          })),
-          type: 'bar'
+          type: 'bar',
+          data: props.data.map(item => item.value),
+          itemStyle: { color: '#409EFF' }
         }
       ],
     }));

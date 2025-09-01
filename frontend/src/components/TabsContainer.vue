@@ -1,7 +1,7 @@
 <template>
   <el-tabs 
     stretch="true" 
-    type="border-card" 
+    tab-position="top"
     class="tabs-container"
     v-model="activeTab"
   >
@@ -19,8 +19,8 @@
 
 <script>
 import {
-  VariablePressureTab,
-  VariableTemperatureTab,
+  SolubilityTrappingTab,
+  MineralTrappingTab,
   VariablePTTab,
   SensitivityAnalysisTab
 } from './tabs/index.js';
@@ -28,24 +28,24 @@ import {
 export default {
   name: 'TabsContainer',
   components: {
-    VariablePressureTab,
-    VariableTemperatureTab,
+    SolubilityTrappingTab,
+    MineralTrappingTab,
     VariablePTTab,
     SensitivityAnalysisTab
   },
   data() {
     return {
-      activeTab: 'variable-pressure',
+      activeTab: 'solubility-trapping',
       tabs: [
         {
-          name: 'variable-pressure',
-          label: 'Variable pressure',
-          component: 'VariablePressureTab'
+          name: 'solubility-trapping',
+          label: 'Solubility trapping',
+          component: 'SolubilityTrappingTab'
         },
         {
-          name: 'variable-temperature',
-          label: 'Variable temperature',
-          component: 'VariableTemperatureTab'
+          name: 'mineral-trapping',
+          label: 'Mineral trapping',
+          component: 'MineralTrappingTab'
         },
         {
           name: 'variable-pt',
@@ -75,7 +75,6 @@ export default {
 
 .tabs-container :deep(.el-tabs__content) {
   flex: 1;
-  padding: 10px;
   height: 100%;
 }
 
@@ -86,9 +85,5 @@ export default {
 }
 
 /* Make sure the plot component fills the tab */
-.tabs-container :deep(.el-tab-pane) {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
+
 </style>

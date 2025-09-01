@@ -67,6 +67,7 @@
 import { ref, computed, onMounted } from "vue";
 import { store } from "../store";
 import { Plus } from '@element-plus/icons-vue';
+import waterPresets from '@/presets/waterChemistryPresets.json';
 
 // Define a type for ion names to match the keys in concentrations
 type IonName = "Na+" | "K+" | "Cl-" | "Mg+2" | "Ca+2" | "SO4-2" | "HCO3-" | "CO3-2";
@@ -93,7 +94,9 @@ const concentrationUnitLabel = computed(() => {
   }
 });
 
-const presetOptions = ['Pure water', 'Seawater'];
+// Cast imported JSON to a generic presets map for TypeScript indexing via double assertion
+const presets = (waterPresets as unknown) as Record<string, Partial<Record<IonName, number>>>;
+const presetOptions = Object.keys(presets);
 
 // --- State for Charge Balance Error ---
 const cbe = ref(0); // Charge Balance Error in %
@@ -146,20 +149,10 @@ const alertInfo = computed(() => {
 });
 
 const updateWaterPreset = (preset: string) => {
-  if (preset === "Seawater") {
-    store.simulationInput.concentrations["Cl-"] = 0.546;
-    store.simulationInput.concentrations["Na+"] = 0.469;
-    store.simulationInput.concentrations["Mg+2"] = 0.0528;
-    store.simulationInput.concentrations["SO4-2"] = 0.0282;
-    store.simulationInput.concentrations["Ca+2"] = 0.0103;
-    store.simulationInput.concentrations["K+"] = 0.0102;
-  } else if (preset === "Pure water") {
-    store.simulationInput.concentrations["Cl-"] = 0;
-    store.simulationInput.concentrations["Na+"] = 0;
-    store.simulationInput.concentrations["Mg+2"] = 0;
-    store.simulationInput.concentrations["SO4-2"] = 0;
-    store.simulationInput.concentrations["Ca+2"] = 0;
-    store.simulationInput.concentrations["K+"] = 0;
+  // Apply preset values from JSON
+  const presetValues = presets[preset] || {};
+  for (const ion of ions) {
+    store.simulationInput.concentrations[ion] = presetValues[ion] ?? 0;
   }
   // Recalculate CBE after preset is applied
   calculateChargeBalance();

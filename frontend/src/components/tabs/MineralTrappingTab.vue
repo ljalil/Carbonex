@@ -14,7 +14,7 @@ import Plot from '../Plot.vue';
 import { store } from '../../store';
 
 export default {
-  name: 'VariableTemperatureTab',
+  name: 'MineralTrappingTab',
   components: { 
     Plot 
   },

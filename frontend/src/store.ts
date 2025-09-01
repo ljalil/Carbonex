@@ -16,6 +16,20 @@ interface StreamImpurities {
     "O2": number;
     "H2S": number;
     "Hydrogen": number;
+    "Nitrogen": number;
+}
+// Formation mineralogy inputs
+interface Minerals {
+  Quartz: number;
+  Albite: number;
+  "K-feldspar": number;
+  Illite: number;
+  Kaolinite: number;
+  Calcite: number;
+  Dolomite: number;
+  Smectite: number;
+  Siderite: number;
+  Chlorite: number;
 }
 
 interface SpeciesData {
@@ -60,6 +74,9 @@ interface SimulationInput {
   corrosionModel: CorrosionModelType;
   considerImpurities: boolean;
   streamImpurities: StreamImpurities;
+  minerals: Minerals;
+  /** Selected mineralogy preset */
+  mineralogyPreset?: string;
 }
 
 interface UnitPreferences {
@@ -88,13 +105,26 @@ export const store = reactive<{
     },
     model: 'duan_sun_2006', // Default model
     corrosionModel: 'deWaald1991',
-    considerImpurities: false,
-    streamImpurities: {
+  considerImpurities: false,
+  streamImpurities: {
         "CO2": 1,
         "O2": 0,
         "H2S": 0,
-        "Hydrogen": 0
-    },
+        "Hydrogen": 0,
+        "Nitrogen": 0,
+  },
+  minerals: {
+    Quartz: 0,
+    Albite: 0,
+    "K-feldspar": 0,
+    Illite: 0,
+    Kaolinite: 0,
+    Calcite: 0,
+    Dolomite: 0,
+    Smectite: 0,
+    Siderite: 0,
+    Chlorite: 0
+  }
   },
   simulationOutput: {
     total_dissolved_co2: 0,

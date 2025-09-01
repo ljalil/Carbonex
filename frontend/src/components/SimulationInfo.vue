@@ -1,7 +1,6 @@
 <template>
   
   <TotalDissolvedCO2Card />
-  <SolutionTabs />
   <OperationalRisk />
 </template>
   

@@ -1,0 +1,26 @@
+{
+  "Nugget sandstone": {
+    "Quartz": 0.80,
+    "Albite": 0.05,
+    "K-feldspar": 0.10,
+    "Illite": 0.02,
+    "Kaolinite": 0.01,
+    "Calcite": 0.01,
+    "Dolomite": 0.00,
+    "Smectite": 0.00,
+    "Siderite": 0.00,
+    "Chlorite": 0.01
+  },
+  "Muddy sandstone": {
+    "Quartz": 0.25,
+    "Albite": 0.10,
+    "K-feldspar": 0.05,
+    "Illite": 0.30,
+    "Kaolinite": 0.10,
+    "Calcite": 0.05,
+    "Dolomite": 0.05,
+    "Smectite": 0.10,
+    "Siderite": 0.00,
+    "Chlorite": 0.00
+  }
+}

@@ -4,7 +4,7 @@
   
     <el-button type="default">Export CSV</el-button>
     <el-button type="default">Export Figures</el-button>
-    <el-button type="default" @click="dialogVisible = true">Units</el-button>
+    <el-button type="default" @click="dialogVisible = true">Units Settings</el-button>
 
     <el-dialog
     v-model="dialogVisible"
@@ -41,7 +41,6 @@ import UnitsSettings from "./UnitsSettings.vue";
     runSimulation()
     runSimulationWithVaryingPressure()
     runSimulationWithVaryingTemperature()
-    runSimulationWithVaryingPressureTemperature()
     emit('run-simulation-clicked')
   }
   </script>

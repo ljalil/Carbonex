@@ -45,7 +45,7 @@
 import { computed, onMounted } from 'vue'
 import { store } from '../store'
 // Gas mole fraction logic
-const gases = ['CO2', 'O2', 'H2S', 'Hydrogen'] as const
+const gases = ['CO2', 'O2', 'H2S', 'Hydrogen', 'Nitrogen'] as const
 
 const handleConsiderImpuritiesChange = () => { if (!store.simulationInput.considerImpurities) calculateSum() }
 const sumFractions = computed(() => gases.reduce((sum, gas) => sum + store.simulationInput.streamImpurities[gas], 0))

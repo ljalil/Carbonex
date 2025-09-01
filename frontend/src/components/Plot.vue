@@ -63,18 +63,18 @@ export default defineComponent({
           return `${props.tooltipLabels[0]}: ${x}<br>${props.tooltipLabels[1]}: ${y}`;
         }
       },
-      grid: { left: '5%', right: '5%', bottom: '5%', containLabel: true },
+      grid: { left: '4%', right: '2%', bottom: '10%', top:'5%', containLabel: true },
       xAxis: [
         {
           type: 'value', name: props.xAxisLabel, nameLocation: 'center',
           nameGap: 30, min: 'dataMin', max: 'dataMax',
-          position: 'bottom', axisTicks: { inside: true }
+          position: 'bottom', axisTicks: { inside: true , interval: "auto"}
         },
-        {
-          type: 'value', name: props.xAxisLabel, nameLocation: 'center',
-          nameGap: 30, min: 'dataMin', max: 'dataMax',
-          position: 'top', axisTicks: { inside: true }
-        }
+        // {
+        //   type: 'value', name: props.xAxisLabel, nameLocation: 'center',
+        //   nameGap: 30, min: 'dataMin', max: 'dataMax',
+        //   position: 'top', axisTicks: { inside: true }
+        // }
       ],
       yAxis: [
         {
@@ -82,17 +82,18 @@ export default defineComponent({
           nameGap: 30, min: 0, max: yMax.value,
           position: 'left', axisTicks: { inside: true }
         },
-        {
-          type: 'value', name: props.yAxisLabel, nameLocation: 'center',
-          nameGap: 30, min: 0, max: yMax.value,
-          position: 'right', axisTicks: { inside: true }
-        }
+        // {
+        //   type: 'value', name: props.yAxisLabel, nameLocation: 'center',
+        //   nameGap: 30, min: 0, max: yMax.value,
+        //   position: 'right', axisTicks: { inside: true }
+        // }
       ],
       series: [
         {
           data: props.data,
           type: 'line',
           smooth: false,
+          itemStyle: { color: '#409EFF' }
         },
       ],
     }));
@@ -108,14 +109,16 @@ export default defineComponent({
   width: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chart {
   flex: 1;
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .no-plot {
