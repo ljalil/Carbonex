@@ -1,11 +1,6 @@
 <template>
   <div class="tab-content">
-    <Plot 
-      :data="store.simulationOutput.plotDataTemperature"
-      x-axis-label="Temperature (K)"
-      y-axis-label="Dissolved CO2 (mol/kg)"
-      :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
-    />
+
   </div>
 </template>
 

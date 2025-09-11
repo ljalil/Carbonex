@@ -44,7 +44,7 @@ export default defineComponent({
     },
     xAxisLabel: {
       type: String,
-      default: 'Activity'
+      default: 'Species'
     },
     yAxisLabel: {
       type: String,
@@ -79,10 +79,11 @@ export default defineComponent({
         data: props.data.map(item => item.label),
         name: props.xAxisLabel,
         nameLocation: 'center',
-        nameGap: 30,
-        axisTick: { alignWithLabel: true },
+        nameGap: 50,
+        axisTick: { alignWithLabel: true, rotation: 90 },
         axisLabel: {
           interval: 0,
+          rotate: 90,
           formatter: (value: string) => value
         }
       },
@@ -91,7 +92,8 @@ export default defineComponent({
         name: props.yAxisLabel,
         nameLocation: 'center',
         nameGap: 30,
-        min: 'dataMin',
+        min: 0,
+        max: 1,
       },
       series: [
         {

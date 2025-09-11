@@ -50,7 +50,5 @@ const simulationOutput = computed(() => store.simulationOutput);
 </script>
 
 <style scoped>
-.solution-properties-card {
-  margin-bottom: 16px;
-}
+
 </style>

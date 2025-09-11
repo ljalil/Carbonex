@@ -39,6 +39,7 @@ export default defineComponent({
       type: Array as PropType<[number, number][]>,
       required: true,
     },
+    emphasis: {type: Object as PropType<[number, number]>},
     xAxisLabel: { type: String, default: 'X Axis' },
     yAxisLabel: { type: String, default: 'Y Axis' },
     tooltipLabels: {
@@ -94,6 +95,13 @@ export default defineComponent({
           type: 'line',
           smooth: false,
           itemStyle: { color: '#409EFF' }
+        },
+        {
+          data: [props.emphasis],
+          type: 'line',
+          smooth: false,
+          symbolSize:10,
+          itemStyle: {  color: 'red' }
         },
       ],
     }));

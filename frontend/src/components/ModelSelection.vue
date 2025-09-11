@@ -2,12 +2,27 @@
   <el-card class="sidebar-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <span>Simulation model</span>
+        <span>Simulation models</span>
       </div>
     </template>
 
-    <el-form label-position="left" label-width="90px">
+    <el-form label-position="left" label-width="auto">
       <el-form-item label="Main model">
+        <el-select
+          size="small"
+          v-model="store.simulationInput.model"
+          placeholder="Select model"
+          style="width: 100%"
+        >
+          <el-option
+            v-for="option in modelOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+            <el-form-item label="Solubility model">
         <el-select
           size="small"
           v-model="store.simulationInput.model"
