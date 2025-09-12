@@ -9,32 +9,32 @@
       <tbody>
         <tr style="height:10px">
           <td style="width:50%"><el-text>Density</el-text></td>
-          <td style="width:15%"><el-text type="primary" tag="b">{{ simulationOutput.density?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td style="width:15%"><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.density?.toFixed(4) || 'N/A' }}</el-text></td>
           <td style="width:25%"><el-text>g/cm</el-text></td>
         </tr>
         <tr>
           <td><el-text>Ionic strength</el-text></td>
-          <td><el-text type="primary" tag="b">{{ simulationOutput.ionic_strength?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.ionic_strength?.toFixed(4) || 'N/A' }}</el-text></td>
           <td><el-text>mol/kgw</el-text></td>
         </tr>
         <tr>
           <td><el-text>pH</el-text></td>
-          <td><el-text type="primary" tag="b">{{ simulationOutput.pH?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.pH?.toFixed(4) || 'N/A' }}</el-text></td>
           <td></td>
         </tr>
         <tr>
           <td><el-text>Osmotic coefficient</el-text></td>
-          <td><el-text type="primary" tag="b">{{ simulationOutput.osmotic_coefficient?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.osmotic_coefficient?.toFixed(4) || 'N/A' }}</el-text></td>
           <td></td>
         </tr>
         <!-- <tr>
           <td><el-text>CO<sub>2</sub> fugacity coeff. (&phi;)</el-text></td>
-          <td><el-text type="primary" tag="b">{{ simulationOutput.fugacity_co2?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.fugacity_co2?.toFixed(4) || 'N/A' }}</el-text></td>
           <td></td>
         </tr>
         <tr>
           <td><el-text>CO<sub>2</sub> partial pressure</el-text></td>
-          <td><el-text type="primary" tag="b">{{ simulationOutput.partial_pressure_co2?.toFixed(4) || 'N/A' }}</el-text></td>
+          <td><el-text type="primary" tag="b">{{ simulationOutput.solubilityTrapping.partial_pressure_co2?.toFixed(4) || 'N/A' }}</el-text></td>
           <td></td>
         </tr> -->
       </tbody>

@@ -8,8 +8,8 @@
         <!-- Solubility plot -->
         <div class="plot-wrapper">
           <Plot
-            :data="simulationOutput.plotDataPressure"
-            :emphasis="[store.simulationInput.pressure, store.simulationOutput.total_dissolved_co2]"
+            :data="simulationOutput.solubilityTrapping.plotDataPressure"
+            :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
             x-axis-label="Pressure (MPa)"
             y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Pressure', 'Dissolved CO2']"
@@ -18,8 +18,8 @@
 
         <div class="plot-wrapper">
           <Plot 
-            :data="store.simulationOutput.plotDataTemperature"
-            :emphasis="[store.simulationInput.temperature, store.simulationOutput.total_dissolved_co2]"
+            :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
+            :emphasis="[store.simulationInput.temperature, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
             x-axis-label="Temperature (K)"
             y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
@@ -29,7 +29,11 @@
 
       <el-col :span="10">
         <!-- Activities plot -->
-         <TotalDissolvedCO2Card />
+         <SingleValueCard 
+           title="Dissolved CO<sub>2</sub>"
+           :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2"
+           unit="mol/kg"
+         />
          <SolutionProperties />
          <el-card  shadow="never">
               <template #header>
@@ -80,7 +84,7 @@ import { computed } from 'vue';
 import Plot from '../Plot.vue';
 import BarPlot from '../BarPlot.vue';
 import SolutionProperties from '../SolutionProperties.vue';
-import TotalDissolvedCO2Card from '../TotalDissolvedCO2Card.vue'
+import SingleValueCard from '../SingleValueCard.vue'
 import { store } from '../../store';
 
 const simulationOutput = computed(() => store.simulationOutput);
@@ -98,7 +102,7 @@ const ionNameMapping: Record<string, string> = {
 const formatIonName = (ion: string) => ionNameMapping[ion] || ion;
 
 const activityData = computed(() =>
-  (simulationOutput.value.speciesData || []).map((item: any) => ({
+  (simulationOutput.value.solubilityTrapping.speciesData || []).map((item: any) => ({
     label: item.species,
     value: item.activity
   }))

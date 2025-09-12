@@ -7,6 +7,8 @@
       </div>
     </template>
 
+
+
     <el-form label-position="left" label-width="auto">
       <!-- Preset selector -->
       <el-form-item label="Preset">
@@ -35,7 +37,7 @@
           <el-input-number
             v-model="store.simulationInput.minerals[mineral]"
             size="small"
-            :min="0"
+            :min="-0.1"
             :precision="4"
             :step="0.1"
             style="flex: 1"
@@ -47,6 +49,8 @@
         </el-form-item>
       </template>
     </el-form>
+
+        <el-alert style="margin-top: 10px !important;" :closable="false">Value of 0 allows the mineral to precipitate. Values below 0 prohibits its precipitation.</el-alert>
   </el-card>
 </template>
 
@@ -64,7 +68,6 @@ type MineralName =
   | 'Kaolinite'
   | 'Calcite'
   | 'Dolomite'
-  | 'Smectite'
   | 'Siderite'
   | 'Chlorite';
 
@@ -72,11 +75,11 @@ type MineralName =
 const minerals: MineralName[] = [
   'Quartz', 'Albite', 'K-feldspar', 'Illite',
   'Kaolinite', 'Calcite', 'Dolomite',
-  'Smectite', 'Siderite', 'Chlorite'
+'Siderite', 'Chlorite'
 ];
 // Grouped mineral categories
 const carbonates: MineralName[] = ['Calcite', 'Siderite', 'Dolomite'];
-const clays: MineralName[] = ['Illite', 'Kaolinite', 'Smectite'];
+const clays: MineralName[] = ['Illite', 'Kaolinite'];
 const feldspars: MineralName[] = ['Albite', 'K-feldspar'];
 const quartzGroup: MineralName[] = ['Quartz'];
 const other: MineralName[] = minerals.filter(m =>

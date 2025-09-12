@@ -25,39 +25,25 @@ def get_solution_properties(temperature, pressure, species):
     # Define the output file path consistently
     state_out_file = os.path.join(temp_files_path, "solution_properties.tsv")
 
-    phreeqc_code = f'DATABASE /usr/local/share/doc/phreeqc/database/pitzer.dat\n'
-    phreeqc_code += f'SOLUTION 1\n\ttemp\t{temperature_c}\n\tpH\t7.0\n\t'
-    phreeqc_code += f'units\tmol/kgw\n\tNa\t{Na}\n\tCl\t{Cl}\n\tCa\t{Ca}\n\tMg\t{Mg}\n\tK\t{K}\n\tS(6)\t{SO4}\n\tC {HCO3} as HCO3\n'
-    phreeqc_code += f'GAS_PHASE 1\n\t-fixed_pressure\n\t-pressure {pressure_atm}\n'
-    phreeqc_code += f'\t-volume 1.0\n\t CO2(g) {p_co2}\n\tH2O(g) {p_h2o}\n'
-    phreeqc_code +=  f'''
-USER_PUNCH
-    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC PR_CO2 PHI_CO2
-    -start
-    10 PUNCH VM("Na+")
-    20 PUNCH VM("Cl-")
-    30 PUNCH VM("K+")
-    40 PUNCH VM("Ca+2")
-    50 PUNCH VM("Mg+2")
-    60 PUNCH VM("SO4-2")
-    70 PUNCH VM("HCO3-")
-    80 PUNCH VM("CO3-2")
-    90 PUNCH RHO
-    100 PUNCH OSMOTIC
-    110 PUNCH PR_P("CO2(g)")
-    120 PUNCH PR_PHI("CO2(g)")
-    -end
-
-SELECTED_OUTPUT
-    -file {state_out_file}
-    -totals C(4)
-    -solution True
-    -gases CO2(g)
-    -saturation_indices CO2(g)
-    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
-    -ionic_strength True
-    -calculate_values
-END'''
+    # Load the PHREEQC template
+    template_path = os.path.join('phreeqc_programs', 'co2_brine_template.pqi')
+    with open(template_path, 'r') as template_file:
+        phreeqc_code = template_file.read()
+    
+    # Replace template placeholders with actual values
+    phreeqc_code = phreeqc_code.replace('__DATABASE__', '/usr/local/share/doc/phreeqc/database/pitzer.dat')
+    phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
+    phreeqc_code = phreeqc_code.replace('__NA__', str(Na))
+    phreeqc_code = phreeqc_code.replace('__CL__', str(Cl))
+    phreeqc_code = phreeqc_code.replace('__CA__', str(Ca))
+    phreeqc_code = phreeqc_code.replace('__MG__', str(Mg))
+    phreeqc_code = phreeqc_code.replace('__K__', str(K))
+    phreeqc_code = phreeqc_code.replace('__SO4__', str(SO4))
+    phreeqc_code = phreeqc_code.replace('__HCO3__', str(HCO3))
+    phreeqc_code = phreeqc_code.replace('__PRESSURE_ATM__', str(pressure_atm))
+    phreeqc_code = phreeqc_code.replace('__P_CO2__', str(p_co2))
+    phreeqc_code = phreeqc_code.replace('__P_H2O__', str(p_h2o))
+    phreeqc_code = phreeqc_code.replace('__OUTPUT_FILE__', state_out_file)
 
     filename = os.path.join(temp_files_path, 'solution_properties.pqi')
 
@@ -135,28 +121,27 @@ END'''
     return species_data, density, ionic_strength, ph, osmotic_coefficient, partial_pressure_co2, fugacity_co2
 
 def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
-    database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'
     temp_files_path = "."
-
     temperature_c = temperature - 273.15
 
-    phreeqc_code = f"DATABASE {database_path}\n\n"
-
-    phreeqc_code += "SOLUTION 1\n"
-    phreeqc_code += f"\ttemperature\t{temperature_c}\n"
-    phreeqc_code += "\tunits\tmol/kgw\n"
-    phreeqc_code += f'\tNa\t{ion_moles.get("Na+", 0)}\n'
-    phreeqc_code += f'\tCl\t{ion_moles.get("Cl-", 0)}\n'
-    phreeqc_code += f'\tCa\t{ion_moles.get("Ca+2", 0)}\n'
-    phreeqc_code += f'\tMg\t{ion_moles.get("Mg+2", 0)}\n'
-    phreeqc_code += f'\tK\t{ion_moles.get("K+", 0)}\n'
-    phreeqc_code += f'\tS(6)\t{ion_moles.get("SO4-2", 0)}\n'
+    # Load the PHREEQC template
+    template_path = os.path.join('phreeqc_programs', 'co2_brine_var_pressure_template.pqi')
+    with open(template_path, 'r') as template_file:
+        phreeqc_code = template_file.read()
     
-    phreeqc_code  += f'GAS_PHASE 1\n\t-fixed_volume\n\tCO2(g)\t0\n\tH2O(g)\t0\n'
-    phreeqc_code  += f'REACTION 1\n\tCO2 1;\t  0 100*0.5\n'
-    phreeqc_code  += 'INCREMENTAL_REACTIONS true\n'
-    temperature_str = str(temperature).replace('.', '_')
-    phreeqc_code += f'SELECTED_OUTPUT\n\t-file {os.path.join(temp_files_path, "varying_pressure.tsv")}\n\t-totals\tC(4)\n\t-solution True\n\t-gases\tCO2(g)\n\t-saturation_indices CO2(g)\nEND\n'
+    # Replace template placeholders with actual values
+    database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'
+    output_file = os.path.join(temp_files_path, "varying_pressure.tsv")
+    
+    phreeqc_code = phreeqc_code.replace('__DATABASE__', database_path)
+    phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
+    phreeqc_code = phreeqc_code.replace('__NA__', str(ion_moles.get("Na+", 0)))
+    phreeqc_code = phreeqc_code.replace('__CL__', str(ion_moles.get("Cl-", 0)))
+    phreeqc_code = phreeqc_code.replace('__CA__', str(ion_moles.get("Ca+2", 0)))
+    phreeqc_code = phreeqc_code.replace('__MG__', str(ion_moles.get("Mg+2", 0)))
+    phreeqc_code = phreeqc_code.replace('__K__', str(ion_moles.get("K+", 0)))
+    phreeqc_code = phreeqc_code.replace('__SO4__', str(ion_moles.get("SO4-2", 0)))
+    phreeqc_code = phreeqc_code.replace('__OUTPUT_FILE__', output_file)
 
     filename = 'varying_pressure.pqi'
 
@@ -181,11 +166,13 @@ def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
         for row in reader:
             # Convert pressure from atm to MPa
             pressure = float(row.get('pressure', 0)) * 0.101325
+            pressure = round(pressure, 2)
             dissolved_co2 = float(row.get('C(4)', 2))
             
             result['Pressure (MPa)'].append(pressure)
             result['Dissolved CO2 (mol/kg)'].append(dissolved_co2)
 
+    
     #print('phreeqc pressures' ,result['Pressure (MPa)'], file=sys.stdout, flush=True)
     #print('phreeqc solubilities' ,result['Dissolved CO2 (mol/kg)'], file=sys.stdout, flush=True)
 
@@ -339,38 +326,26 @@ def _run_PHREEQC_state_simulation(temperature, pressure, species, database):
 
     # Define the output file path consistently
     state_out_file = os.path.join(temp_files_path, "state_out.tsv")
-
-    phreeqc_code = f'DATABASE /usr/local/share/doc/phreeqc/database/{database}.dat\n'
-    phreeqc_code += f'SOLUTION 1\n\ttemp\t{temperature_c}\n\tpH\t7.0\n\t'
-    phreeqc_code += f'units\tmol/kgw\n\tNa\t{Na}\n\tCl\t{Cl}\n\tCa\t{Ca}\n\tMg\t{Mg}\n\tK\t{K}\n\tS(6)\t{SO4}\n\tC {HCO3} as HCO3\n'
-    phreeqc_code += f'GAS_PHASE 1\n\t-fixed_pressure\n\t-pressure {pressure_atm}\n'
-    phreeqc_code += f'\t-volume 1.0\n\t CO2(g) {p_co2}\n\tH2O(g) {p_h2o}\n'
-    phreeqc_code += f'''
-USER_PUNCH
-    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC
-    -start
-    10 PUNCH VM("Na+")
-    20 PUNCH VM("Cl-")
-    30 PUNCH VM("K+")
-    40 PUNCH VM("Ca+2")
-    50 PUNCH VM("Mg+2")
-    60 PUNCH VM("SO4-2")
-    70 PUNCH VM("HCO3-")
-    80 PUNCH VM("CO3-2")
-    90 PUNCH RHO
-    100 PUNCH OSMOTIC
-    -end
-
-SELECTED_OUTPUT
-    -file {state_out_file}
-    -totals C(4)
-    -solution True
-    -gases CO2(g)
-    -saturation_indices CO2(g)
-    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
-    -ionic_strength True
-    -calculate_values
-END'''
+    
+    # Load the PHREEQC template
+    template_path = os.path.join('phreeqc_programs', 'co2_brine_template.pqi')
+    with open(template_path, 'r') as template_file:
+        phreeqc_code = template_file.read()
+    
+    # Replace template placeholders with actual values
+    phreeqc_code = phreeqc_code.replace('__DATABASE__', f'/usr/local/share/doc/phreeqc/database/{database}.dat')
+    phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
+    phreeqc_code = phreeqc_code.replace('__NA__', str(Na))
+    phreeqc_code = phreeqc_code.replace('__CL__', str(Cl))
+    phreeqc_code = phreeqc_code.replace('__CA__', str(Ca))
+    phreeqc_code = phreeqc_code.replace('__MG__', str(Mg))
+    phreeqc_code = phreeqc_code.replace('__K__', str(K))
+    phreeqc_code = phreeqc_code.replace('__SO4__', str(SO4))
+    phreeqc_code = phreeqc_code.replace('__HCO3__', str(HCO3))
+    phreeqc_code = phreeqc_code.replace('__PRESSURE_ATM__', str(pressure_atm))
+    phreeqc_code = phreeqc_code.replace('__P_CO2__', str(p_co2))
+    phreeqc_code = phreeqc_code.replace('__P_H2O__', str(p_h2o))
+    phreeqc_code = phreeqc_code.replace('__OUTPUT_FILE__', state_out_file)
 
     filename = os.path.join(temp_files_path, 'state_out.pqi')
 
@@ -503,3 +478,172 @@ def run_state_simulation(temperature, pressure, species, model):
 
     return dissolved_co2
 
+def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineralogy, model):
+    """
+    Run PHREEQC simulation for brine-rock interaction at a single state.
+    
+    Parameters:
+        temperature: Temperature in Kelvin
+        pressure: Pressure in MPa
+        species: Dictionary of ion molalities
+        mineralogy: Dictionary of mineral names and initial moles
+        model: Database model ('phreeqc' or 'pitzer')
+    
+    Returns:
+        dict: Results including dissolved CO2, mineral deltas, and solution properties
+    """
+    temp_files_path = '.'
+    Na = species.get('Na+', 0)
+    Cl = species.get('Cl-', 0)
+    Mg = species.get('Mg+2', 0)
+    Ca = species.get('Ca+2', 0)
+    K = species.get('K+', 0)
+    SO4 = species.get('SO4-2', 0)
+    HCO3 = species.get('HCO3-', 0)
+    CO3 = species.get('CO3-2', 0)
+
+    pressure_atm = pressure * 9.86923
+    temperature_c = temperature - 273.15
+    p_co2 = pressure_atm * 0.95
+    p_h2o = pressure_atm * 0.05
+
+    # Define the output file path consistently
+    brine_rock_out_file = os.path.join(temp_files_path, "co2_brine_rock.tsv")
+    
+    # Load the PHREEQC template
+    template_path = os.path.join('phreeqc_programs', 'co2_brine_rock_template.pqi')
+    with open(template_path, 'r') as template_file:
+        phreeqc_code = template_file.read()
+    
+    # Build mineral phases section based on mineralogy dict
+    mineral_phases = []
+    mineral_names = {
+        'quartz': 'Quartz',
+        'calcite': 'Calcite', 
+        'siderite': 'Siderite',
+        'dolomite': 'Dolomite',
+        'illite': 'Illite',
+        'kaolinite': 'Kaolinite',
+        'k_feldspar': 'K-feldspar',
+        'albite': 'Albite',
+        'chlorite': 'Chlorite(14A)'
+    }
+    
+    for mineral_key, phreeqc_name in mineral_names.items():
+        if mineral_key in mineralogy and mineralogy[mineral_key] >= 0:
+            # Include mineral with 0 saturation index and specified initial moles
+            mineral_phases.append(f"    {phreeqc_name}        0   {mineralogy[mineral_key]}")
+        else:
+            # Comment out or skip minerals with negative values
+            mineral_phases.append(f"    #{phreeqc_name}       0   0")
+    
+    mineral_phases_str = '\n'.join(mineral_phases)
+    
+    # Replace template placeholders with actual values
+    database_name = model if model in ['phreeqc', 'pitzer'] else 'phreeqc'
+    phreeqc_code = phreeqc_code.replace('__DATABASE__', f'/usr/local/share/doc/phreeqc/database/{database_name}.dat')
+    phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
+    phreeqc_code = phreeqc_code.replace('__NA__', str(Na))
+    phreeqc_code = phreeqc_code.replace('__CL__', str(Cl))
+    phreeqc_code = phreeqc_code.replace('__CA__', str(Ca))
+    phreeqc_code = phreeqc_code.replace('__MG__', str(Mg))
+    phreeqc_code = phreeqc_code.replace('__K__', str(K))
+    phreeqc_code = phreeqc_code.replace('__SO4__', str(SO4))
+    phreeqc_code = phreeqc_code.replace('__HCO3__', str(HCO3))
+    phreeqc_code = phreeqc_code.replace('__PRESSURE_ATM__', str(pressure_atm))
+    phreeqc_code = phreeqc_code.replace('__P_CO2__', str(p_co2))
+    phreeqc_code = phreeqc_code.replace('__P_H2O__', str(p_h2o))
+    phreeqc_code = phreeqc_code.replace('__MINERAL_PHASES__', mineral_phases_str)
+
+    filename = os.path.join(temp_files_path, 'co2_brine_rock.pqi')
+
+    with open(filename, 'w') as pqi:
+        pqi.write(phreeqc_code)
+
+    # Run phreeqc with full paths
+    subprocess.run(['phreeqc', filename, filename.replace('.pqi', '.pqo')], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+    # Make sure the file exists before trying to read it
+    if not os.path.exists(brine_rock_out_file):
+        raise FileNotFoundError(f"Output file not found: {brine_rock_out_file}")
+
+    # Initialize results with a default empty dictionary
+    results = {}
+    
+    # Read the output file
+    try:
+        with open(brine_rock_out_file, mode='r') as file:
+            reader = csv.DictReader(file, delimiter='\t')
+            # Clean column names by stripping spaces
+            if reader.fieldnames:
+                fieldnames = [field.strip() for field in reader.fieldnames]
+                reader = csv.DictReader(file, fieldnames=fieldnames, delimiter='\t')
+                next(reader)  # Skip header row
+                
+                # Get the last row (final simulation state)
+                for row in reader:
+                    results = row  # Will keep the last row
+                    
+    except Exception as e:
+        print(f"Error reading {brine_rock_out_file}: {str(e)}")
+        raise
+
+    # Extract results
+    try:
+        dissolved_co2 = float(results.get('C(4)', 0))
+        density = float(results.get('SOL_DENSITY', 0))
+        ionic_strength = float(results.get('mu', 0))
+        ph = float(results.get('pH', 7.0))
+        osmotic_coefficient = float(results.get('OSMOTIC', 0))
+        partial_pressure_co2 = float(results.get('PR_CO2', 0))
+        fugacity_co2 = float(results.get('PHI_CO2', 0))
+        
+        # Extract mineral deltas
+        mineral_equi = {}
+        for mineral_key, phreeqc_name in mineral_names.items():
+            delta_key = f'EQUI_{phreeqc_name.upper().replace("-", "").replace("(", "").replace(")", "").replace("14A", "")}'
+            if mineral_key in mineralogy and mineralogy[mineral_key] >= 0:
+                mineral_equi[mineral_key] = float(results.get(delta_key, 0))
+            else:
+                mineral_equi[mineral_key] = 0
+                
+    except (ValueError, TypeError) as e:
+        print(f"Error parsing results: {e}")
+        dissolved_co2 = 0
+        density = 0
+        ionic_strength = 0
+        ph = 7.0
+        osmotic_coefficient = 0
+        partial_pressure_co2 = 0
+        fugacity_co2 = 0
+        mineral_equi = {k: 0 for k in mineral_names.keys()}
+
+    return {
+        'dissolved_co2': dissolved_co2,
+        'density': density,
+        'ionic_strength': ionic_strength,
+        'ph': ph,
+        'osmotic_coefficient': osmotic_coefficient,
+        'partial_pressure_co2': partial_pressure_co2,
+        'fugacity_co2': fugacity_co2,
+        'mineral_equi': mineral_equi
+    }
+
+if __name__ == "__main__":
+    # Simple single point prediction
+    
+    temperature = 320  # 50°C
+    pressure = 34      # 15 MPa
+    species = {'Na+': 2, 'Cl-': 2}  # Simple brine
+    mineralogy = {'calcite': 10.0, 'quartz': 5.0}  # Basic minerals
+    model = 'phreeqc'
+    
+    print(f"Running CO2-brine-rock simulation at {temperature-273.15}°C and {pressure} MPa")
+    
+    result = _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineralogy, model)
+    
+    print(f"Dissolved CO2: {result['dissolved_co2']:.6f} mol/kg")
+    print(f"pH: {result['ph']:.2f}")
+    print(f"Density: {result['density']:.3f} g/cm3")
+    print(f"CO2 partial pressure: {result['partial_pressure_co2']:.6f} atm")
+    print(f"Minerals deltas: {result['mineral_equi']}")

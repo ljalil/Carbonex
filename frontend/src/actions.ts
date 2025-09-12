@@ -23,7 +23,7 @@ export async function runStaticSimulation() {
       
       if (!isNaN(co2Value)) {
         // CORRECT: Mutate the property directly
-        store.simulationOutput.total_dissolved_co2 = co2Value;
+        store.simulationOutput.solubilityTrapping.total_dissolved_co2 = co2Value;
       } else {
         console.error("Invalid dissolved CO2 value received:", dissolved_co2);
       }
@@ -56,14 +56,14 @@ export async function runSimulation() {
       const responseData = response.data.data;
 
       // CORRECT: Update each property on the existing reactive object
-      store.simulationOutput.density = parseFloat(responseData.density || 0);
-      store.simulationOutput.ionic_strength = parseFloat(responseData.ionic_strength || 0);
-      store.simulationOutput.pH = parseFloat(responseData.pH || 0);
-      store.simulationOutput.activity_of_water = parseFloat(responseData.activity_of_water || 0);
-      store.simulationOutput.osmotic_coefficient = parseFloat(responseData.osmotic_coefficient || 0);
-      store.simulationOutput.fugacity_co2 = parseFloat(responseData.fugacity_co2 || 0);
-      store.simulationOutput.partial_pressure_co2 = parseFloat(responseData.partial_pressure_co2 || 0);
-      store.simulationOutput.speciesData = responseData.species_data || [];
+      store.simulationOutput.solubilityTrapping.density = parseFloat(responseData.density || 0);
+      store.simulationOutput.solubilityTrapping.ionic_strength = parseFloat(responseData.ionic_strength || 0);
+      store.simulationOutput.solubilityTrapping.pH = parseFloat(responseData.pH || 0);
+      store.simulationOutput.solubilityTrapping.activity_of_water = parseFloat(responseData.activity_of_water || 0);
+      store.simulationOutput.solubilityTrapping.osmotic_coefficient = parseFloat(responseData.osmotic_coefficient || 0);
+      store.simulationOutput.solubilityTrapping.fugacity_co2 = parseFloat(responseData.fugacity_co2 || 0);
+      store.simulationOutput.solubilityTrapping.partial_pressure_co2 = parseFloat(responseData.partial_pressure_co2 || 0);
+      store.simulationOutput.solubilityTrapping.speciesData = responseData.species_data || [];
     } else {
       console.error("API returned error or unexpected structure:", response.data);
       throw new Error(`API Error: ${response.data.message || "Unknown error"}`);
@@ -74,14 +74,14 @@ export async function runSimulation() {
   } catch (error) {
     console.error("Error during simulation:", error);
     // Reset values on error if needed, but do it property by property
-    store.simulationOutput.density = 0;
-    store.simulationOutput.ionic_strength = 0;
-    store.simulationOutput.pH = 0;
-    store.simulationOutput.activity_of_water = 0;
-    store.simulationOutput.osmotic_coefficient = 0;
-    store.simulationOutput.fugacity_co2 = 0;
-    store.simulationOutput.partial_pressure_co2 = 0;
-    store.simulationOutput.speciesData = [];
+    store.simulationOutput.solubilityTrapping.density = 0;
+    store.simulationOutput.solubilityTrapping.ionic_strength = 0;
+    store.simulationOutput.solubilityTrapping.pH = 0;
+    store.simulationOutput.solubilityTrapping.activity_of_water = 0;
+    store.simulationOutput.solubilityTrapping.osmotic_coefficient = 0;
+    store.simulationOutput.solubilityTrapping.fugacity_co2 = 0;
+    store.simulationOutput.solubilityTrapping.partial_pressure_co2 = 0;
+    store.simulationOutput.solubilityTrapping.speciesData = [];
     // Do not reset plotDataPressure, plotDataTemperature or total_dissolved_co2 on this specific error
   }
 }
@@ -102,14 +102,14 @@ export async function runSimulationWithVaryingPressure() {
     const plotData = response.data.data.plot_data || [];
 
     // CORRECT: Update just the plotDataPressure property
-    store.simulationOutput.plotDataPressure = plotData;
+    store.simulationOutput.solubilityTrapping.plotDataPressure = plotData;
 
-    console.log("Plot data updated with varying pressure results:", store.simulationOutput.plotDataPressure);
+    console.log("Plot data updated with varying pressure results:", store.simulationOutput.solubilityTrapping.plotDataPressure);
 
   } catch (error) {
     console.error("Error during varying pressure simulation:", error);
     // On error, reset only the pressure plot data
-    store.simulationOutput.plotDataPressure = [];
+    store.simulationOutput.solubilityTrapping.plotDataPressure = [];
   }
 }
 
@@ -129,14 +129,14 @@ export async function runSimulationWithVaryingTemperature() {
     const plotData = response.data.data.plot_data || [];
 
     // CORRECT: Update just the plotDataTemperature property
-    store.simulationOutput.plotDataTemperature = plotData;
+    store.simulationOutput.solubilityTrapping.plotDataTemperature = plotData;
 
-    console.log("Plot data updated with varying temperature results:", store.simulationOutput.plotDataTemperature);
+    console.log("Plot data updated with varying temperature results:", store.simulationOutput.solubilityTrapping.plotDataTemperature);
 
   } catch (error) {
     console.error("Error during varying temperature simulation:", error);
     // On error, reset only the temperature plot data
-    store.simulationOutput.plotDataTemperature = [];
+    store.simulationOutput.solubilityTrapping.plotDataTemperature = [];
   }
 }
 
@@ -155,18 +155,18 @@ export async function runSimulationWithVaryingPressureTemperature() {
     const responseData = response.data.data;
 
     // CORRECT: Update the heatmap data
-    store.simulationOutput.heatmapData = {
+    store.simulationOutput.solubilityTrapping.heatmapData = {
       grid_data: responseData.grid_data || [],
       temperatures: responseData.temperatures || [],
       pressures: responseData.pressures || []
     };
 
-    console.log("Heatmap data updated with varying pressure-temperature results:", store.simulationOutput.heatmapData);
+    console.log("Heatmap data updated with varying pressure-temperature results:", store.simulationOutput.solubilityTrapping.heatmapData);
 
   } catch (error) {
     console.error("Error during varying pressure-temperature simulation:", error);
     // On error, reset the heatmap data
-    store.simulationOutput.heatmapData = {
+    store.simulationOutput.solubilityTrapping.heatmapData = {
       grid_data: [],
       temperatures: [],
       pressures: []

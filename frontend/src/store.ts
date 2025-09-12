@@ -27,7 +27,6 @@ interface Minerals {
   Kaolinite: number;
   Calcite: number;
   Dolomite: number;
-  Smectite: number;
   Siderite: number;
   Chlorite: number;
 }
@@ -38,7 +37,7 @@ interface SpeciesData {
   molar_volume: number;
 }
 
-interface SimulationOutput {
+interface SolubilityTrapping {
   total_dissolved_co2: number;
   density: number;
   ionic_strength: number;
@@ -55,6 +54,15 @@ interface SimulationOutput {
     temperatures: number[]; // Temperature values in Kelvin
     pressures: number[]; // Pressure values in MPa
   };
+}
+
+export interface MineralTrapping {
+  // Empty for now - will be populated later
+}
+
+interface SimulationOutput {
+  solubilityTrapping: SolubilityTrapping;
+  mineralTrapping: MineralTrapping;
 }
 
 // Define available unit types
@@ -121,36 +129,40 @@ export const store = reactive<{
     Kaolinite: 0,
     Calcite: 0,
     Dolomite: 0,
-    Smectite: 0,
     Siderite: 0,
     Chlorite: 0
   }
   },
   simulationOutput: {
-    total_dissolved_co2: 0,
-    density: 0,
-    ionic_strength: 0,
-    pH: 0,
-    activity_of_water: 0,
-    osmotic_coefficient: 0,
-    fugacity_co2: 0,
-    partial_pressure_co2: 0,
-    speciesData: [
-      { species: "Na+", activity: 0, molar_volume: 0 },
-      { species: "Cl-", activity: 0, molar_volume: 0 },
-      { species: "K+", activity: 0, molar_volume: 0 },
-      { species: "Mg+2", activity: 0, molar_volume: 0 },
-      { species: "Ca+2", activity: 0, molar_volume: 0 },
-      { species: "SO4-2", activity: 0, molar_volume: 0 },
-      { species: "HCO3-", activity: 0, molar_volume: 0 },
-      { species: "CO3-2", activity: 0, molar_volume: 0 },
-    ],
-    plotDataPressure: [],
-    plotDataTemperature: [],
-    heatmapData: {
-      grid_data: [],
-      temperatures: [],
-      pressures: []
+    solubilityTrapping: {
+      total_dissolved_co2: 0,
+      density: 0,
+      ionic_strength: 0,
+      pH: 0,
+      activity_of_water: 0,
+      osmotic_coefficient: 0,
+      fugacity_co2: 0,
+      partial_pressure_co2: 0,
+      speciesData: [
+        { species: "Na+", activity: 0, molar_volume: 0 },
+        { species: "Cl-", activity: 0, molar_volume: 0 },
+        { species: "K+", activity: 0, molar_volume: 0 },
+        { species: "Mg+2", activity: 0, molar_volume: 0 },
+        { species: "Ca+2", activity: 0, molar_volume: 0 },
+        { species: "SO4-2", activity: 0, molar_volume: 0 },
+        { species: "HCO3-", activity: 0, molar_volume: 0 },
+        { species: "CO3-2", activity: 0, molar_volume: 0 },
+      ],
+      plotDataPressure: [],
+      plotDataTemperature: [],
+      heatmapData: {
+        grid_data: [],
+        temperatures: [],
+        pressures: []
+      }
+    },
+    mineralTrapping: {
+      // Empty for now
     }
   },
   unitPreferences: {

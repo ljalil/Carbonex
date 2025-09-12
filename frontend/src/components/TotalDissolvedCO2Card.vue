@@ -2,7 +2,7 @@
   <el-card class="sidebar-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <span>Total dissolved CO<sub>2</sub></span>
+        <span>Dissolved CO<sub>2</sub></span>
       </div>
     </template>
 

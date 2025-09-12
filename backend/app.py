@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation
+from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation, _run_PHREEQC_brine_rock_single_state
 
 
 import numpy as np
@@ -207,6 +207,52 @@ def simulate_solubility_fixed_endpoint():
             "status": "error",
             "message": str(e)
         })
+
+
+@app.route('/simulate/brine_rock/single_state', methods=['POST'])
+def simulate_rock_brine_single_state_endpoint():
+    try:
+        data = request.json
+
+        temperature = data.get('temperature')
+        pressure = data.get('pressure')
+        concentrations = data.get('concentrations')
+        mineralogy = data.get('mineralogy', {})  # Dictionary of mineral names and initial moles
+        model = data.get('model', 'phreeqc')  # Default to phreeqc database
+        
+        # Call the _run_PHREEQC_brine_rock_single_state function
+        results = _run_PHREEQC_brine_rock_single_state(
+            temperature=temperature,
+            pressure=pressure,
+            species=concentrations,
+            mineralogy=mineralogy,
+            model=model
+        )
+        
+        response_data = {
+            "dissolved_co2": results['dissolved_co2'],
+            "density": results['density'],
+            "ionic_strength": results['ionic_strength'],
+            "ph": results['ph'],
+            "osmotic_coefficient": results['osmotic_coefficient'],
+            "partial_pressure_co2": results['partial_pressure_co2'],
+            "fugacity_co2": results['fugacity_co2'],
+            "mineral_deltas": results['mineral_deltas']
+        }
+
+        return jsonify({
+            "status": "success",
+            "message": "Brine-rock simulation completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from brine-rock simulation: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
 
 if __name__ == '__main__':
 
