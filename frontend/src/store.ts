@@ -37,7 +37,7 @@ interface SpeciesData {
   molar_volume: number;
 }
 
-interface SolubilityTrapping {
+export interface SolubilityTrapping {
   total_dissolved_co2: number;
   density: number;
   ionic_strength: number;
@@ -57,7 +57,16 @@ interface SolubilityTrapping {
 }
 
 export interface MineralTrapping {
-  // Empty for now - will be populated later
+  dissolved_co2: number;
+  density: number;
+  ionic_strength: number;
+  pH: number;
+  osmotic_coefficient: number;
+  fugacity_co2: number;
+  partial_pressure_co2: number;
+  mineral_equi: Record<string, number>; // Dictionary of mineral deltas
+  plotDataPressure: [number, number][]; // Array of [pressure, dissolved_co2] pairs
+  plotDataTemperature: [number, number][]; // Array of [temperature, dissolved_co2] pairs
 }
 
 interface SimulationOutput {
@@ -162,7 +171,16 @@ export const store = reactive<{
       }
     },
     mineralTrapping: {
-      // Empty for now
+      dissolved_co2: 0,
+      density: 0,
+      ionic_strength: 0,
+      pH: 0,
+      osmotic_coefficient: 0,
+      fugacity_co2: 0,
+      partial_pressure_co2: 0,
+      mineral_equi: {},
+      plotDataPressure: [],
+      plotDataTemperature: []
     }
   },
   unitPreferences: {

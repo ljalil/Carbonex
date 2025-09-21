@@ -73,7 +73,7 @@ def get_solution_properties(temperature, pressure, species):
                 for row in reader:
                     results = row  # Will keep the last row
     except Exception as e:
-        print(f"Error reading {state_out_file}: {str(e)}")
+        print(f"Error reading {state_out_file}: {str(e)}", flush=True)
         raise
 
     species_data = []
@@ -106,7 +106,7 @@ def get_solution_properties(temperature, pressure, species):
     
         density = float(results.get('SOL_DENSITY', 0))
         ionic_strength = float(results.get('mu', 0))
-        ph = float(results.get('pH', 7.0))
+        pH = float(results.get('pH', 7.0))
         osmotic_coefficient = float(results.get('OSMOTIC', 0))
         partial_pressure_co2 = float(results.get('PR_CO2', 0))
         fugacity_co2 = float(results.get('PHI_CO2', 0))
@@ -114,11 +114,11 @@ def get_solution_properties(temperature, pressure, species):
     except (ValueError, TypeError):
         density = 0
         ionic_strength = 0
-        ph = 7.0
+        pH = 7.0
         osmotic_coefficient = 0
         
 
-    return species_data, density, ionic_strength, ph, osmotic_coefficient, partial_pressure_co2, fugacity_co2
+    return species_data, density, ionic_strength, pH, osmotic_coefficient, partial_pressure_co2, fugacity_co2
 
 def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
     temp_files_path = "."
@@ -184,6 +184,123 @@ def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
 
     return result
 
+def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, database):
+    """
+    Run PHREEQC simulation for CO2-brine-rock interaction over a pressure range.
+    
+    Parameters:
+        temperature: Temperature in Kelvin
+        ion_moles: Dictionary of ion molalities
+        mineralogy: Dictionary of mineral names and initial moles
+        database: Database model ('phreeqc' or 'pitzer')
+    
+    Returns:
+        dict: Results with 'Pressure (MPa)' and 'Dissolved CO2 (mol/kg)' lists
+    """
+    temp_files_path = "."
+    temperature_c = temperature - 273.15
+
+    # Load the PHREEQC template
+    template_path = os.path.join('phreeqc_programs', 'co2_brine_rock_var_pressure_template.pqi')
+    with open(template_path, 'r') as template_file:
+        phreeqc_code = template_file.read()
+    
+    # Build mineral phases section based on mineralogy dict
+    mineral_phases = []
+    mineral_names = {
+        'quartz': 'Quartz',
+        'calcite': 'Calcite', 
+        'siderite': 'Siderite',
+        'dolomite': 'Dolomite',
+        'illite': 'Illite',
+        'kaolinite': 'Kaolinite',
+        'k_feldspar': 'K-feldspar',
+        'albite': 'Albite',
+        'chlorite': 'Chlorite(14A)'
+    }
+    
+    for mineral_key, phreeqc_name in mineral_names.items():
+        if mineral_key in mineralogy and mineralogy[mineral_key] >= 0:
+            # Include mineral with 0 saturation index and specified initial moles
+            mineral_phases.append(f"    {phreeqc_name}        0   {mineralogy[mineral_key]}")
+        else:
+            # Comment out or skip minerals with negative values
+            mineral_phases.append(f"    #{phreeqc_name}       0   0")
+    
+    mineral_phases_str = '\n'.join(mineral_phases)
+    
+    # Replace template placeholders with actual values
+    database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'
+    output_file = os.path.join(temp_files_path, "co2_brine_rock.tsv")
+    
+    phreeqc_code = phreeqc_code.replace('__DATABASE__', database_path)
+    phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
+    phreeqc_code = phreeqc_code.replace('__NA__', str(ion_moles.get("Na+", 0)))
+    phreeqc_code = phreeqc_code.replace('__CL__', str(ion_moles.get("Cl-", 0)))
+    phreeqc_code = phreeqc_code.replace('__CA__', str(ion_moles.get("Ca+2", 0)))
+    phreeqc_code = phreeqc_code.replace('__MG__', str(ion_moles.get("Mg+2", 0)))
+    phreeqc_code = phreeqc_code.replace('__K__', str(ion_moles.get("K+", 0)))
+    phreeqc_code = phreeqc_code.replace('__SO4__', str(ion_moles.get("SO4-2", 0)))
+    phreeqc_code = phreeqc_code.replace('__HCO3__', str(ion_moles.get("HCO3-", 0)))
+    phreeqc_code = phreeqc_code.replace('__MINERAL_PHASES__', mineral_phases_str)
+
+    filename = 'co2_brine_rock_varying_pressure.pqi'
+
+    pqi = open(os.path.join(temp_files_path, filename), 'w')
+    pqi.write(phreeqc_code)
+    pqi.close()
+
+    subprocess.run(['phreeqc', f"{os.path.join(temp_files_path, filename)}", f"{os.path.join(temp_files_path, filename).replace('.pqi', '.pqo')}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+    # Read data using standard csv module instead of pandas
+    result = {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
+    
+    with open(output_file, mode='r') as file:
+        reader = csv.DictReader(file, delimiter='\t')
+        # Clean column names by stripping spaces
+        if reader.fieldnames:
+            fieldnames = [field.strip() for field in reader.fieldnames]
+            reader = csv.DictReader(file, fieldnames=fieldnames, delimiter='\t')
+            next(reader)  # Skip header row since we're providing our own fieldnames
+        
+        for row in reader:
+            # Get pressure from gas phase data - need to check what column name is used
+            # in the brine-rock template output
+            try:
+                # Try different possible pressure column names
+                pressure = None
+                if 'pressure' in row:
+                    pressure = float(row['pressure'])
+                elif 'CO2(g)' in row:  
+                    # If CO2(g) pressure is available
+                    pressure = float(row['CO2(g)'])
+                elif 'PR_CO2' in row:
+                    # Partial pressure from USER_PUNCH
+                    pressure = float(row['PR_CO2'])
+                
+                if pressure is not None:
+                    # Convert pressure from atm to MPa if needed
+                    pressure_mpa = pressure * 0.101325 if pressure > 1.0 else pressure
+                    pressure_mpa = round(pressure_mpa, 2)
+                    
+                    dissolved_co2 = float(row.get('C(4)', 0))
+                    
+                    result['Pressure (MPa)'].append(pressure_mpa)
+                    result['Dissolved CO2 (mol/kg)'].append(dissolved_co2)
+                    
+            except (ValueError, KeyError) as e:
+                # Skip rows with invalid data
+                continue
+
+    # Clean up temporary files
+    if os.path.exists("error.inp"):
+        os.remove("error.inp")
+        
+    if os.path.exists("phreeqc.log"):
+        os.remove("phreeqc.log")
+
+    return result
+
 def _simulate_varying_pressure_Carbonex(temperature, ion_moles):
     return {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
 
@@ -229,7 +346,7 @@ def _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database):
             result['Temperature (K)'].append(temperature)
             result['Dissolved CO2 (mol/kg)'].append(dissolved_co2)
         except Exception as e:
-            print(f"Error at temperature {temperature}: {e}")
+            print(f"Error at temperature {temperature}: {e}", flush=True)
             # Skip this temperature point on error
             continue
     
@@ -379,7 +496,7 @@ def _run_PHREEQC_state_simulation(temperature, pressure, species, database):
                     #print(results)
             
     except Exception as e:
-        print(f"Error reading {state_out_file}: {str(e)}")
+        print(f"Error reading {state_out_file}: {str(e)}", flush=True)
         raise
 
     # Extract the C(4) value (dissolved CO2)
@@ -585,7 +702,7 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
                     results = row  # Will keep the last row
                     
     except Exception as e:
-        print(f"Error reading {brine_rock_out_file}: {str(e)}")
+        print(f"Error reading {brine_rock_out_file}: {str(e)}", flush=True)
         raise
 
     # Extract results
@@ -593,7 +710,7 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
         dissolved_co2 = float(results.get('C(4)', 0))
         density = float(results.get('SOL_DENSITY', 0))
         ionic_strength = float(results.get('mu', 0))
-        ph = float(results.get('pH', 7.0))
+        pH = float(results.get('pH', 7.0))
         osmotic_coefficient = float(results.get('OSMOTIC', 0))
         partial_pressure_co2 = float(results.get('PR_CO2', 0))
         fugacity_co2 = float(results.get('PHI_CO2', 0))
@@ -608,11 +725,11 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
                 mineral_equi[mineral_key] = 0
                 
     except (ValueError, TypeError) as e:
-        print(f"Error parsing results: {e}")
+        print(f"Error parsing results: {e}", flush=True)
         dissolved_co2 = 0
         density = 0
         ionic_strength = 0
-        ph = 7.0
+        pH = 7.0
         osmotic_coefficient = 0
         partial_pressure_co2 = 0
         fugacity_co2 = 0
@@ -622,7 +739,7 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
         'dissolved_co2': dissolved_co2,
         'density': density,
         'ionic_strength': ionic_strength,
-        'ph': ph,
+        'pH': pH,
         'osmotic_coefficient': osmotic_coefficient,
         'partial_pressure_co2': partial_pressure_co2,
         'fugacity_co2': fugacity_co2,
@@ -643,7 +760,79 @@ if __name__ == "__main__":
     result = _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineralogy, model)
     
     print(f"Dissolved CO2: {result['dissolved_co2']:.6f} mol/kg")
-    print(f"pH: {result['ph']:.2f}")
+    print(f"pH: {result['pH']:.2f}")
     print(f"Density: {result['density']:.3f} g/cm3")
     print(f"CO2 partial pressure: {result['partial_pressure_co2']:.6f} atm")
     print(f"Minerals deltas: {result['mineral_equi']}")
+
+
+def simulate_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, model):
+    """
+    Simulate CO2 solubility with brine-rock interaction over a range of pressures at fixed temperature.
+    
+    Parameters:
+        temperature: Fixed temperature in Kelvin
+        ion_moles: Dictionary of ion molalities 
+        mineralogy: Dictionary of mineral names and initial moles
+        model: Database model ('phreeqc' or 'pitzer')
+    
+    Returns:
+        dict: Contains 'Pressure (MPa)' and 'Dissolved CO2 (mol/kg)' lists
+    """
+    pressures = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]  # MPa range
+    dissolved_co2_values = []
+    
+    for pressure in pressures:
+        try:
+            result = _run_PHREEQC_brine_rock_single_state(
+                temperature=temperature,
+                pressure=pressure,
+                species=ion_moles,
+                mineralogy=mineralogy,
+                model=model
+            )
+            dissolved_co2_values.append(result['dissolved_co2'])
+        except Exception as e:
+            print(f"Error at pressure {pressure} MPa: {e}")
+            dissolved_co2_values.append(0)
+    
+    return {
+        'Pressure (MPa)': pressures,
+        'Dissolved CO2 (mol/kg)': dissolved_co2_values
+    }
+
+
+def simulate_brine_rock_varying_temperature(pressure, ion_moles, mineralogy, model):
+    """
+    Simulate CO2 solubility with brine-rock interaction over a range of temperatures at fixed pressure.
+    
+    Parameters:
+        pressure: Fixed pressure in MPa
+        ion_moles: Dictionary of ion molalities 
+        mineralogy: Dictionary of mineral names and initial moles
+        model: Database model ('phreeqc' or 'pitzer')
+    
+    Returns:
+        dict: Contains 'Temperature (K)' and 'Dissolved CO2 (mol/kg)' lists
+    """
+    temperatures = [298, 313, 328, 343, 358, 373, 388, 403, 418, 433]  # K range (25-160°C)
+    dissolved_co2_values = []
+    
+    for temperature in temperatures:
+        try:
+            result = _run_PHREEQC_brine_rock_single_state(
+                temperature=temperature,
+                pressure=pressure,
+                species=ion_moles,
+                mineralogy=mineralogy,
+                model=model
+            )
+            dissolved_co2_values.append(result['dissolved_co2'])
+        except Exception as e:
+            print(f"Error at temperature {temperature} K: {e}")
+            dissolved_co2_values.append(0)
+    
+    return {
+        'Temperature (K)': temperatures,
+        'Dissolved CO2 (mol/kg)': dissolved_co2_values
+    }

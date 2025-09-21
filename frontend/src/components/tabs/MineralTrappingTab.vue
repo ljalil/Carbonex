@@ -1,24 +1,96 @@
 <template>
   <div class="tab-content">
+    <el-row :gutter="20" style="height: 100%">
+      <el-col :span="14" class="plots-column">
+        <!-- Variable pressure plot -->
+        <div class="plot-wrapper">
+          <Plot
+            :data="plotDataPressure"
+            :emphasis="[store.simulationInput.pressure, store.simulationOutput.mineralTrapping.dissolved_co2]"
+            x-axis-label="Pressure (MPa)"
+            y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Pressure', 'Dissolved CO2']"
+          />
+        </div>
 
+        <!-- Variable temperature plot -->
+        <div class="plot-wrapper">
+          <Plot 
+            :data="plotDataTemperature"
+            :emphasis="[store.simulationInput.temperature, store.simulationOutput.mineralTrapping.dissolved_co2]"
+            x-axis-label="Temperature (K)"
+            y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
+          />
+        </div>
+      </el-col>
+
+      <el-col :span="10">
+        <!-- Dissolved CO2 card -->
+         <SingleValueCard 
+           title="Dissolved CO<sub>2</sub>"
+           :value="store.simulationOutput.mineralTrapping.dissolved_co2"
+           unit="mol/kg"
+         />
+         
+         <!-- Solution properties -->
+         <SolutionProperties :data="simulationOutput.mineralTrapping" />
+         
+         <!-- Mineral equilibrium chart -->
+         <el-card shadow="never">
+              <template #header>
+      <div class="card-header">
+        <span>Mineral equilibrium changes</span>
+      </div>
+    </template>
+        <div class="activity-chart-container">
+          <BarPlot
+            :data="activityData"
+            x-axis-label="Minerals"
+            y-axis-label="Equilibrium change (mol)"
+          />
+        </div>
+</el-card>
+
+      </el-col>
+    </el-row>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue';
 import Plot from '../Plot.vue';
+import BarPlot from '../BarPlot.vue';
+import SolutionProperties from '../SolutionProperties.vue';
+import SingleValueCard from '../SingleValueCard.vue'
 import { store } from '../../store';
 
-export default {
-  name: 'MineralTrappingTab',
-  components: { 
-    Plot 
-  },
-  data() {
-    return {
-      store
-    };
-  }
-}
+const simulationOutput = computed(() => store.simulationOutput);
+
+// Use actual plot data from store instead of placeholders
+const plotDataPressure = computed(() => store.simulationOutput.mineralTrapping.plotDataPressure || []);
+const plotDataTemperature = computed(() => store.simulationOutput.mineralTrapping.plotDataTemperature || []);
+
+const ionNameMapping: Record<string, string> = {
+  'Na+': 'Na<sup>+</sup>',
+  'K+': 'K<sup>+</sup>',
+  'Cl-': 'Cl<sup>-</sup>',
+  'Mg+2': 'Mg<sup>+2</sup>',
+  'Ca+2': 'Ca<sup>+2</sup>',
+  'SO4-2': 'SO<sub>4</sub><sup>-2</sup>',
+  'HCO3-': 'HCO<sub>3</sub><sup>-</sup>',
+  'CO3-2': 'CO<sub>3</sub><sup>-2</sup>'
+};
+
+const formatIonName = (ion: string) => ionNameMapping[ion] || ion;
+
+const activityData = computed(() => {
+  const mineralEqui = simulationOutput.value.mineralTrapping.mineral_equi || {};
+  return Object.entries(mineralEqui).map(([mineral, delta]) => ({
+    label: mineral.charAt(0).toUpperCase() + mineral.slice(1), // Capitalize first letter
+    value: delta
+  }));
+});
 </script>
 
 <style scoped>
@@ -26,5 +98,23 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.plots-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.plot-wrapper {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 16px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.plot-wrapper:last-child {
+  margin-bottom: 0;
 }
 </style>

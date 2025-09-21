@@ -7,7 +7,7 @@
 
   <SingleValueCard 
     title="Total trapped CO<sub>2</sub>"
-    :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2"
+    :value="store.simulationOutput.mineralTrapping.dissolved_co2"
     unit="mol/kg"
   />
   <!-- <OperationalRisk /> -->

@@ -34,7 +34,7 @@
            :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2"
            unit="mol/kg"
          />
-         <SolutionProperties />
+         <SolutionProperties :data="simulationOutput.solubilityTrapping" />
          <el-card  shadow="never">
               <template #header>
       <div class="card-header">

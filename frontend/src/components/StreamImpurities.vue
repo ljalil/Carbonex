@@ -28,6 +28,7 @@
         </div>
       </el-form-item>
     </el-form>
+    <el-alert style="margin-top: 10px !important;" :closable="false">Only PHREEQC-based models are able to simulate mixtures of gases. These inputs will be ignored otherwise.</el-alert>
     <template #footer>
       <el-alert
         :title="alertInfo.title"

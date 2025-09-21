@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation, _run_PHREEQC_brine_rock_single_state
+from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation, _run_PHREEQC_brine_rock_single_state, simulate_brine_rock_varying_pressure, simulate_brine_rock_varying_temperature
 
 
 import numpy as np
@@ -24,12 +24,12 @@ def simulate_solution_properties():
 
         
 
-        species_data, density, ionic_strength, ph, osmotic_coefficient, partial_pressure_co2, fugacity_co2 = get_solution_properties(temperature=temperature, pressure=pressure, species=concentrations)
+        species_data, density, ionic_strength, pH, osmotic_coefficient, partial_pressure_co2, fugacity_co2 = get_solution_properties(temperature=temperature, pressure=pressure, species=concentrations)
 
         response_data = {
             "density": density,
             "ionic_strength": ionic_strength,
-            "pH": ph,
+            "pH": pH,
             "activity_of_water": 0.0,  # Set default value since it's not returned by the function
             "osmotic_coefficient": osmotic_coefficient,
             "species_data": species_data,
@@ -59,8 +59,7 @@ def simulate_solubility_var_p_endpoint():
         temperature = data.get('temperature')
         concentrations = data.get('concentrations')
         model = data.get('model')
-        print('running simulation with varying pressure, model', model,flush=True)
-        
+
         # Call the simulate_varying_pressure function
         result = simulate_varying_pressure(temperature=temperature, ion_moles=concentrations, model=model)
         #print('returned results', result,flush=True)
@@ -74,10 +73,6 @@ def simulate_solubility_var_p_endpoint():
             "plot_data": plot_data
         }
 
-        print('this is the response data for plotting:')
-        print(type(response_data['plot_data']), flush=True)
-        print(type(response_data['plot_data'][0]), flush=True)
-        print(type(response_data['plot_data'][0][0]), flush=True)
         #print(type(response_data['plot_data']['Pressure(MPa)']), flush=True)
         #print(type(response_data['plot_data']['Pressure(MPa)'][0]), flush=True)
 
@@ -103,8 +98,7 @@ def simulate_solubility_var_t_endpoint():
         pressure = data.get('pressure')
         concentrations = data.get('concentrations')
         model = data.get('model')
-        print('running simulation with varying temperature, model', model, flush=True)
-        
+
         # Call the simulate_varying_temperature function
         result = simulate_varying_temperature(pressure=pressure, ion_moles=concentrations, model=model)
         
@@ -116,11 +110,6 @@ def simulate_solubility_var_t_endpoint():
         response_data = {
             "plot_data": plot_data
         }
-
-        print('this is the response data for varying temperature plotting:')
-        print(type(response_data['plot_data']), flush=True)
-        print(type(response_data['plot_data'][0]), flush=True)
-        print(type(response_data['plot_data'][0][0]), flush=True)
 
         return jsonify({
             "status": "success",
@@ -143,8 +132,7 @@ def simulate_solubility_var_pt_endpoint():
 
         concentrations = data.get('concentrations')
         model = data.get('model')
-        print('running simulation with varying pressure and temperature, model', model, flush=True)
-        
+
         # Call the simulate_varying_pressure_temperature function
         result = simulate_varying_pressure_temperature(ion_moles=concentrations, model=model)
         
@@ -154,10 +142,6 @@ def simulate_solubility_var_pt_endpoint():
             "pressures": result['pressures']
         }
 
-        print('this is the response data for pressure-temperature heatmap:')
-        print(f'Grid data length: {len(response_data["grid_data"])}', flush=True)
-        print(f'Temperature range: {len(response_data["temperatures"])} points', flush=True)
-        print(f'Pressure range: {len(response_data["pressures"])} points', flush=True)
 
         return jsonify({
             "status": "success",
@@ -183,7 +167,7 @@ def simulate_solubility_fixed_endpoint():
         concentrations = data.get('concentrations')
         model = data.get('model')
         
-        # Call the run_state_simulation function to get only the dissolved CO2 value
+        # Get both dissolved CO2 and complete solution properties
         dissolved_co2 = run_state_simulation(
             temperature=temperature,
             pressure=pressure, 
@@ -191,9 +175,21 @@ def simulate_solubility_fixed_endpoint():
             model = model
         )
         
+        # Get additional solution properties using get_solution_properties
+        species_data, density, ionic_strength, pH, osmotic_coefficient, partial_pressure_co2, fugacity_co2 = get_solution_properties(temperature=temperature, pressure=pressure, species=concentrations)
+        
         response_data = {
-            "dissolved_co2": dissolved_co2
+            "total_dissolved_co2": dissolved_co2,
+            "density": density,
+            "ionic_strength": ionic_strength,
+            "pH": pH,
+            "activity_of_water": 0.0,  # Default value since not returned by get_solution_properties
+            "osmotic_coefficient": osmotic_coefficient,
+            "partial_pressure_co2": partial_pressure_co2,
+            "fugacity_co2": fugacity_co2,
+            "speciesData": species_data
         }
+
 
         return jsonify({
             "status": "success",
@@ -233,11 +229,11 @@ def simulate_rock_brine_single_state_endpoint():
             "dissolved_co2": results['dissolved_co2'],
             "density": results['density'],
             "ionic_strength": results['ionic_strength'],
-            "ph": results['ph'],
+            "pH": results['pH'],
             "osmotic_coefficient": results['osmotic_coefficient'],
             "partial_pressure_co2": results['partial_pressure_co2'],
             "fugacity_co2": results['fugacity_co2'],
-            "mineral_deltas": results['mineral_deltas']
+            "mineral_equi": results['mineral_equi']
         }
 
         return jsonify({
@@ -248,6 +244,135 @@ def simulate_rock_brine_single_state_endpoint():
 
     except Exception as e:
         print(f"Error from brine-rock simulation: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
+
+@app.route('/simulate/mineralization/fixed', methods=['POST'])
+def simulate_mineralization_fixed_endpoint():
+    try:
+        data = request.json
+
+        temperature = data.get('temperature')
+        pressure = data.get('pressure')
+        concentrations = data.get('concentrations')
+        mineralogy = data.get('mineralogy', {})  # Dictionary of mineral names and initial moles
+        model = data.get('model', 'phreeqc')  # Default to phreeqc database
+        
+        # Call the _run_PHREEQC_brine_rock_single_state function
+        results = _run_PHREEQC_brine_rock_single_state(
+            temperature=temperature,
+            pressure=pressure,
+            species=concentrations,
+            mineralogy=mineralogy,
+            model=model
+        )
+        
+        response_data = {
+            "dissolved_co2": results['dissolved_co2'],
+            "density": results['density'],
+            "ionic_strength": results['ionic_strength'],
+            "pH": results['pH'],
+            "osmotic_coefficient": results['osmotic_coefficient'],
+            "partial_pressure_co2": results['partial_pressure_co2'],
+            "fugacity_co2": results['fugacity_co2'],
+            "mineral_equi": results['mineral_equi']
+        }
+
+        return jsonify({
+            "status": "success",
+            "message": "Mineralization simulation completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from mineralization simulation: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
+
+@app.route('/simulate/mineralization/var-p', methods=['POST'])
+def simulate_mineralization_var_p_endpoint():
+    try:
+        data = request.json
+
+        temperature = data.get('temperature')
+        concentrations = data.get('concentrations')
+        mineralogy = data.get('mineralogy', {})
+        model = data.get('model', 'phreeqc')
+        print('running mineralization simulation with varying pressure, model', model, flush=True)
+        
+        # Call the simulate_brine_rock_varying_pressure function
+        result = simulate_brine_rock_varying_pressure(
+            temperature=temperature, 
+            ion_moles=concentrations, 
+            mineralogy=mineralogy,
+            model=model
+        )
+        
+        # Convert the result to the expected format for plotting
+        plot_data = []
+        for i in range(len(result['Pressure (MPa)'])):
+            plot_data.append([result['Pressure (MPa)'][i], result['Dissolved CO2 (mol/kg)'][i]])
+        
+        response_data = {
+            "plot_data": plot_data
+        }
+
+        return jsonify({
+            "status": "success",
+            "message": "Mineralization simulation with varying pressure completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from mineralization varying pressure: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
+
+@app.route('/simulate/mineralization/var-t', methods=['POST'])
+def simulate_mineralization_var_t_endpoint():
+    try:
+        data = request.json
+
+        pressure = data.get('pressure')
+        concentrations = data.get('concentrations')
+        mineralogy = data.get('mineralogy', {})
+        model = data.get('model', 'phreeqc')
+        print('running mineralization simulation with varying temperature, model', model, flush=True)
+        
+        # Call the simulate_brine_rock_varying_temperature function
+        result = simulate_brine_rock_varying_temperature(
+            pressure=pressure, 
+            ion_moles=concentrations, 
+            mineralogy=mineralogy,
+            model=model
+        )
+        
+        # Convert the result to the expected format for plotting
+        plot_data = []
+        for i in range(len(result['Temperature (K)'])):
+            plot_data.append([result['Temperature (K)'][i], result['Dissolved CO2 (mol/kg)'][i]])
+        
+        response_data = {
+            "plot_data": plot_data
+        }
+
+        return jsonify({
+            "status": "success",
+            "message": "Mineralization simulation with varying temperature completed successfully",
+            "data": response_data
+        })
+
+    except Exception as e:
+        print(f"Error from mineralization varying temperature: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)

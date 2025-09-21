@@ -16,7 +16,7 @@ export async function runStaticSimulation() {
     );
 
     if (response.data.status === "success" && response.data.data) {
-      const dissolved_co2 = response.data.data.dissolved_co2;
+      const dissolved_co2 = response.data.data.total_dissolved_co2;
       const co2Value = typeof dissolved_co2 === 'string' 
         ? parseFloat(dissolved_co2) 
         : Number(dissolved_co2);
@@ -171,5 +171,180 @@ export async function runSimulationWithVaryingPressureTemperature() {
       temperatures: [],
       pressures: []
     };
+  }
+}
+
+export async function runBrineRockSimulation() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      temperature: store.simulationInput.temperature,
+      pressure: store.simulationInput.pressure,
+      mineralogy: store.simulationInput.minerals,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/brine_rock/single_state",
+      payload
+    );
+
+    if (response.data.status === "success" && response.data.data) {
+      const data = response.data.data;
+      
+      // Update mineralTrapping with all returned values
+      store.simulationOutput.mineralTrapping.dissolved_co2 = typeof data.dissolved_co2 === 'string' 
+        ? parseFloat(data.dissolved_co2) 
+        : Number(data.dissolved_co2);
+      store.simulationOutput.mineralTrapping.density = typeof data.density === 'string' 
+        ? parseFloat(data.density) 
+        : Number(data.density);
+      store.simulationOutput.mineralTrapping.ionic_strength = typeof data.ionic_strength === 'string' 
+        ? parseFloat(data.ionic_strength) 
+        : Number(data.ionic_strength);
+      store.simulationOutput.mineralTrapping.pH = typeof data.pH === 'string' 
+        ? parseFloat(data.pH) 
+        : Number(data.pH);
+      store.simulationOutput.mineralTrapping.osmotic_coefficient = typeof data.osmotic_coefficient === 'string' 
+        ? parseFloat(data.osmotic_coefficient) 
+        : Number(data.osmotic_coefficient);
+      store.simulationOutput.mineralTrapping.fugacity_co2 = typeof data.fugacity_co2 === 'string' 
+        ? parseFloat(data.fugacity_co2) 
+        : Number(data.fugacity_co2);
+      store.simulationOutput.mineralTrapping.partial_pressure_co2 = typeof data.partial_pressure_co2 === 'string' 
+        ? parseFloat(data.partial_pressure_co2) 
+        : Number(data.partial_pressure_co2);
+      
+      // Handle mineral equilibrium data
+      store.simulationOutput.mineralTrapping.mineral_equi = data.mineral_equi || {};
+
+      console.log("Brine-rock simulation completed successfully:", store.simulationOutput.mineralTrapping);
+    } else {
+      console.error("No valid data in brine-rock simulation response:", response.data);
+    }
+  } catch (error) {
+    console.error("Error during brine-rock simulation:", error);
+    // On error, reset to default values
+    store.simulationOutput.mineralTrapping = {
+      dissolved_co2: 0,
+      density: 0,
+      ionic_strength: 0,
+      pH: 0,
+      osmotic_coefficient: 0,
+      fugacity_co2: 0,
+      partial_pressure_co2: 0,
+      mineral_equi: {},
+      plotDataPressure: [],
+      plotDataTemperature: []
+    };
+  }
+}
+
+export async function runMineralizationWithVaryingPressure() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      temperature: store.simulationInput.temperature,
+      mineralogy: store.simulationInput.minerals,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/mineralization/var-p",
+      payload
+    );
+
+    const plotData = response.data.data.plot_data || [];
+
+    // Update the plotDataPressure property
+    store.simulationOutput.mineralTrapping.plotDataPressure = plotData;
+
+    console.log("Mineral trapping plot data updated with varying pressure results:", store.simulationOutput.mineralTrapping.plotDataPressure);
+
+  } catch (error) {
+    console.error("Error during mineral trapping varying pressure simulation:", error);
+    // On error, reset only the pressure plot data
+    store.simulationOutput.mineralTrapping.plotDataPressure = [];
+  }
+}
+
+export async function runMineralizationWithVaryingTemperature() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      pressure: store.simulationInput.pressure,
+      mineralogy: store.simulationInput.minerals,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/mineralization/var-t",
+      payload
+    );
+
+    const plotData = response.data.data.plot_data || [];
+
+    // Update the plotDataTemperature property
+    store.simulationOutput.mineralTrapping.plotDataTemperature = plotData;
+
+    console.log("Mineral trapping plot data updated with varying temperature results:", store.simulationOutput.mineralTrapping.plotDataTemperature);
+
+  } catch (error) {
+    console.error("Error during mineral trapping varying temperature simulation:", error);
+    // On error, reset only the temperature plot data
+    store.simulationOutput.mineralTrapping.plotDataTemperature = [];
+  }
+}
+
+export async function runMineralizationFixedState() {
+  try {
+    const payload = {
+      concentrations: store.simulationInput.concentrations,
+      temperature: store.simulationInput.temperature,
+      pressure: store.simulationInput.pressure,
+      mineralogy: store.simulationInput.minerals,
+      model: store.simulationInput.model
+    };
+
+    const response = await axios.post(
+      "http://127.0.0.1:5000/simulate/mineralization/fixed",
+      payload
+    );
+
+    if (response.data.status === "success" && response.data.data) {
+      const data = response.data.data;
+      
+      // Update mineralTrapping with all returned values
+      store.simulationOutput.mineralTrapping.dissolved_co2 = typeof data.dissolved_co2 === 'string' 
+        ? parseFloat(data.dissolved_co2) 
+        : Number(data.dissolved_co2);
+      store.simulationOutput.mineralTrapping.density = typeof data.density === 'string' 
+        ? parseFloat(data.density) 
+        : Number(data.density);
+      store.simulationOutput.mineralTrapping.ionic_strength = typeof data.ionic_strength === 'string' 
+        ? parseFloat(data.ionic_strength) 
+        : Number(data.ionic_strength);
+      store.simulationOutput.mineralTrapping.pH = typeof data.pH === 'string' 
+        ? parseFloat(data.pH) 
+        : Number(data.pH);
+      store.simulationOutput.mineralTrapping.osmotic_coefficient = typeof data.osmotic_coefficient === 'string' 
+        ? parseFloat(data.osmotic_coefficient) 
+        : Number(data.osmotic_coefficient);
+      store.simulationOutput.mineralTrapping.fugacity_co2 = typeof data.fugacity_co2 === 'string' 
+        ? parseFloat(data.fugacity_co2) 
+        : Number(data.fugacity_co2);
+      store.simulationOutput.mineralTrapping.partial_pressure_co2 = typeof data.partial_pressure_co2 === 'string' 
+        ? parseFloat(data.partial_pressure_co2) 
+        : Number(data.partial_pressure_co2);
+      
+      // Handle mineral equilibrium data
+      store.simulationOutput.mineralTrapping.mineral_equi = data.mineral_equi || {};
+
+      console.log("Mineralization simulation completed successfully:", store.simulationOutput.mineralTrapping);
+    } else {
+      console.error("No valid data in mineralization response:", response.data);
+    }
+  } catch (error) {
+    console.error("Error during mineralization fixed state simulation:", error);
   }
 }
