@@ -1,7 +1,7 @@
 <template>
 
 
-    <el-form label-position="left" label-width="90px">
+    <el-form label-position="left" label-width="150px">
       <el-form-item label="Temperature">
         <el-select
           size="small"
@@ -32,7 +32,7 @@
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="Concentration">
+      <el-form-item label="Water chemistry">
         <el-select
           size="small"
           v-model="store.unitPreferences.concentrationUnit"
@@ -47,18 +47,40 @@
           ></el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="Formation mineralogy">
+        <el-select
+          size="small"
+          v-model="store.unitPreferences.mineralogyUnit"
+          placeholder="Select option"
+          @change="updateMineralogyUnit"
+        >
+          <el-option
+            v-for="option in mineralogyUnits"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
     </el-form>
 
 </template>
 
 <script setup lang="ts">
-import { store, type TemperatureUnit, type PressureUnit, type ConcentrationUnit } from "../store";
+import { store } from "../store";
+import { 
+  type TemperatureUnit, 
+  type PressureUnit, 
+  type WaterChemistryUnit, 
+  type FormationMineralogyUnit 
+} from "../units";
 import { ElForm, ElFormItem, ElSelect, ElOption } from "element-plus";
 
 const emit = defineEmits([
   'temperature-unit-changed',
   'pressure-unit-changed',
-  'concentration-unit-changed'
+  'water-chemistry-unit-changed',
+  'formation-mineralogy-unit-changed'
 ] as const);
 
 const temperatureUnits = [
@@ -74,10 +96,15 @@ const pressureUnits = [
   { label: 'PSI', value: 'psi' as PressureUnit }
 ];
 
-const concentrationUnits: { label: string; value: ConcentrationUnit }[] = [
+const concentrationUnits: { label: string; value: WaterChemistryUnit }[] = [
   { label: 'mol/kg', value: 'mol/kg' },
   { label: 'mol/L', value: 'mol/L' },
-  { label: 'ppm', value: 'ppm' }
+  { label: 'mg/L', value: 'mg/L' }
+];
+
+const mineralogyUnits: { label: string; value: FormationMineralogyUnit }[] = [
+  { label: 'moles', value: 'moles' },
+  { label: 'w/w', value: 'w/w' }
 ];
 
 function updateTemperatureUnit() {
@@ -89,7 +116,11 @@ function updatePressureUnit() {
 }
 
 function updateConcentrationUnit() {
-  emit('concentration-unit-changed');
+  emit('water-chemistry-unit-changed');
+}
+
+function updateMineralogyUnit() {
+  emit('formation-mineralogy-unit-changed');
 }
 </script>
 

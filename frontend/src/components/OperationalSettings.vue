@@ -57,71 +57,56 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { store, unitConversion, CO2_CRITICAL_POINT } from '../store'
+import { store, CO2_CRITICAL_POINT } from '../store'
+import { temperatureConversion, pressureConversion, combinedConversions } from '../units'
 import CO2PhaseDiagram from './CO2PhaseDiagram.vue'
 
 // Unit labels
 const temperatureUnitLabel = computed(() => {
-  switch (store.unitPreferences.temperatureUnit) {
-    case 'celsius': return '°C'
-    case 'fahrenheit': return '°F'
-    case 'kelvin': return 'K'
-    default: return '°C'
-  }
+  return temperatureConversion.getUnitLabel(store.unitPreferences.temperatureUnit)
 })
 const temperatureMinValue = computed(() => {
-  switch (store.unitPreferences.temperatureUnit) {
-    case 'celsius': return -273.15
-    case 'fahrenheit': return -459.67
-    case 'kelvin': return 0
-    default: return -273.15
-  }
+  return temperatureConversion.getMinValue(store.unitPreferences.temperatureUnit)
 })
 const pressureUnitLabel = computed(() => {
-  switch (store.unitPreferences.pressureUnit) {
-    case 'bar': return 'bar'
-    case 'atm': return 'atm'
-    case 'psi': return 'psi'
-    case 'mpa': return 'MPa'
-    default: return 'bar'
-  }
+  return pressureConversion.getUnitLabel(store.unitPreferences.pressureUnit)
 })
 
 // Check if CO2 is in supercritical conditions
 const isSupercritical = computed(() => {
-  return unitConversion.isCO2Supercritical(store.simulationInput.temperature, store.simulationInput.pressure)
+  return combinedConversions.isCO2Supercritical(store.simulationInput.temperature, store.simulationInput.pressure)
 })
 
 // Displayed values
-const displayedTemperature = ref(unitConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit))
-const displayedPressure = ref(unitConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit))
+const displayedTemperature = ref(temperatureConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit))
+const displayedPressure = ref(pressureConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit))
 
 // Update handlers
 const handleTemperatureChange = (current: number | undefined) => {
-  store.simulationInput.temperature = unitConversion.toKelvin(current ?? 0, store.unitPreferences.temperatureUnit)
+  store.simulationInput.temperature = temperatureConversion.toKelvin(current ?? 0, store.unitPreferences.temperatureUnit)
 }
 const handlePressureChange = (current: number | undefined) => {
-  store.simulationInput.pressure = unitConversion.toMPa(current ?? 0, store.unitPreferences.pressureUnit)
+  store.simulationInput.pressure = pressureConversion.toMPa(current ?? 0, store.unitPreferences.pressureUnit)
 }
 
 // Watch for changes
 watch(() => store.simulationInput.temperature, val => {
-  displayedTemperature.value = unitConversion.fromKelvin(val, store.unitPreferences.temperatureUnit)
+  displayedTemperature.value = temperatureConversion.fromKelvin(val, store.unitPreferences.temperatureUnit)
 })
 watch(() => store.simulationInput.pressure, val => {
-  displayedPressure.value = unitConversion.fromMPa(val, store.unitPreferences.pressureUnit)
+  displayedPressure.value = pressureConversion.fromMPa(val, store.unitPreferences.pressureUnit)
 })
 watch(() => store.unitPreferences.temperatureUnit, () => {
-  displayedTemperature.value = unitConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit)
+  displayedTemperature.value = temperatureConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit)
 })
 watch(() => store.unitPreferences.pressureUnit, () => {
-  displayedPressure.value = unitConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit)
+  displayedPressure.value = pressureConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit)
 })
 
 // Initialize on mount
 onMounted(() => {
-  displayedTemperature.value = unitConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit)
-  displayedPressure.value = unitConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit)
+  displayedTemperature.value = temperatureConversion.fromKelvin(store.simulationInput.temperature, store.unitPreferences.temperatureUnit)
+  displayedPressure.value = pressureConversion.fromMPa(store.simulationInput.pressure, store.unitPreferences.pressureUnit)
 })
 </script>
 

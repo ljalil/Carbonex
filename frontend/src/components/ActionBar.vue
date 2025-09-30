@@ -11,7 +11,9 @@
     title="Units settings"
     width="400"
   >
-    <UnitsSettings></UnitsSettings>
+    <UnitsSettings
+      @water-chemistry-unit-changed="handleWaterChemistryUnitChanged"
+    ></UnitsSettings>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
@@ -45,6 +47,12 @@ import UnitsSettings from "./UnitsSettings.vue";
     runMineralizationWithVaryingPressure()
     runMineralizationWithVaryingTemperature()
     emit('run-simulation-clicked')
+  }
+
+  const handleWaterChemistryUnitChanged = () => {
+    // The conversion is handled automatically by the watcher in WaterChemistry.vue
+    // This handler can be used for additional actions if needed
+    console.log('Water chemistry unit changed')
   }
   </script>
   

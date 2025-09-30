@@ -64,8 +64,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { store } from "../store";
+import { ref, computed, onMounted, watch } from "vue";
+import { store, storeActions } from "../store";
+import { waterChemistryConversion } from "../units";
 import { Plus } from '@element-plus/icons-vue';
 import waterPresets from '@/presets/waterChemistryPresets.json';
 
@@ -86,12 +87,7 @@ const ionCharges: Record<IonName, number> = {
 };
 
 const concentrationUnitLabel = computed(() => {
-  switch (store.unitPreferences.concentrationUnit) {
-    case 'mol/kg': return 'mol/kg';
-    case 'mol/L': return 'mol/L';
-    case 'ppm': return 'ppm';
-    default: return 'mol/kg';
-  }
+  return waterChemistryConversion.getUnitLabel(store.unitPreferences.concentrationUnit);
 });
 
 // Cast imported JSON to a generic presets map for TypeScript indexing via double assertion
@@ -106,13 +102,33 @@ const WARNING_THRESHOLD = 10; // % for warning vs. error
 /**
  * Calculates the Charge Balance Error (%CBE).
  * %CBE = (Sum(cation equivalents) - Sum(anion equivalents)) / (Sum(cation equivalents) + Sum(anion equivalents)) * 100
+ * Always converts to molality (mol/kg) for proper charge balance calculation regardless of current unit.
  */
 const calculateChargeBalance = () => {
+  // Get current concentrations and convert to molality for charge balance calculation
+  const currentUnit = store.unitPreferences.concentrationUnit;
+  const tempC = storeActions.getCurrentTemperatureC();
+  
+  // Convert current concentrations to molality (mol/kg) for accurate charge balance calculation
+  let concentrationsInMolality;
+  if (currentUnit === 'mol/kg') {
+    // Already in molality, use directly
+    concentrationsInMolality = store.simulationInput.concentrations;
+  } else {
+    // Convert from current unit to molality
+    concentrationsInMolality = waterChemistryConversion.convert(
+      store.simulationInput.concentrations,
+      currentUnit,
+      'mol/kg',
+      tempC
+    );
+  }
+
   let sumCations = 0; // Sum of cation equivalents (mol/kg * charge)
   let sumAnions = 0; // Sum of anion equivalents (mol/kg * |charge|)
 
   for (const ion of ions) {
-    const concentration = store.simulationInput.concentrations[ion];
+    const concentration = concentrationsInMolality[ion];
     const charge = ionCharges[ion];
     if (charge > 0) {
       sumCations += concentration * charge;
@@ -157,6 +173,35 @@ const updateWaterPreset = (preset: string) => {
   // Recalculate CBE after preset is applied
   calculateChargeBalance();
 };
+
+// Watch for unit changes and convert values accordingly
+const previousUnit = ref(store.unitPreferences.concentrationUnit);
+
+watch(
+  () => store.unitPreferences.concentrationUnit,
+  (newUnit) => {
+    if (newUnit !== previousUnit.value) {
+      // Convert current concentrations to the new unit
+      storeActions.convertWaterChemistryUnits(
+        previousUnit.value,
+        newUnit,
+        store.simulationInput.temperature
+      );
+      previousUnit.value = newUnit;
+      // Recalculate CBE after unit conversion
+      calculateChargeBalance();
+    }
+  }
+);
+
+// Watch for temperature changes to recalculate CBE (affects density-dependent conversions)
+watch(
+  () => store.simulationInput.temperature,
+  () => {
+    // Recalculate CBE when temperature changes as it affects conversions
+    calculateChargeBalance();
+  }
+);
 </script>
 
 <style scoped>

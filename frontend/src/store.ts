@@ -1,4 +1,15 @@
 import { reactive } from "vue";
+import { 
+  type TemperatureUnit, 
+  type PressureUnit, 
+  type WaterChemistryUnit, 
+  type FormationMineralogyUnit,
+  temperatureConversion,
+  pressureConversion,
+  combinedConversions,
+  CO2_CRITICAL_POINT,
+  waterChemistryConversion
+} from './units';
 
 interface Concentrations {
     "Na+": number;
@@ -29,6 +40,7 @@ interface Minerals {
   Dolomite: number;
   Siderite: number;
   Chlorite: number;
+  Pyrite: number;
 }
 
 interface SpeciesData {
@@ -76,20 +88,17 @@ interface SimulationOutput {
   aiInsights?: string; // Optional AI-generated insights based on simulation results
 }
 
-// Define available unit types
-export type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
-export type PressureUnit = 'bar' | 'atm' | 'psi' | 'mpa';
-// Available concentration units for input/output
-export type ConcentrationUnit = 'mol/kg' | 'mol/L' | 'ppm';
+// Define available unit types (imported from units module)
+export type { TemperatureUnit, PressureUnit, WaterChemistryUnit, FormationMineralogyUnit } from './units';
+// Backward compatibility aliases
+export type ConcentrationUnit = WaterChemistryUnit;
+export type MineralogyUnit = FormationMineralogyUnit;
 export type PrimaryModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer';
 export type SolubilityModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
 export type CorrosionModelType = 'deWaald1991' | 'deWaald1995';
 
-// CO2 critical point constants
-export const CO2_CRITICAL_POINT = {
-  temperature: 304.18, // Kelvin
-  pressure: 7.38 // MPa
-} as const;
+// CO2 critical point constants (imported from units module)
+export { CO2_CRITICAL_POINT } from './units';
 
 interface SimulationInput {
   temperature: number; // Always stored in Kelvin (backend compatible)
@@ -109,7 +118,8 @@ interface SimulationInput {
 interface UnitPreferences {
   temperatureUnit: TemperatureUnit;
   pressureUnit: PressureUnit;
-  concentrationUnit: ConcentrationUnit;
+  concentrationUnit: WaterChemistryUnit;
+  mineralogyUnit: FormationMineralogyUnit;
 }
 
 export const store = reactive<{
@@ -150,7 +160,8 @@ export const store = reactive<{
     Calcite: 0,
     Dolomite: 0,
     Siderite: 0,
-    Chlorite: 0
+    Chlorite: 0,
+    Pyrite: 0
   }
   },
   simulationOutput: {
@@ -199,66 +210,42 @@ export const store = reactive<{
   unitPreferences: {
   temperatureUnit: 'kelvin',
   pressureUnit: 'mpa',
-  concentrationUnit: 'mol/kg'
+  concentrationUnit: 'mol/kg',
+  mineralogyUnit: 'moles'
   }
 });
 
-// Unit conversion utility functions that can be used throughout the application
-export const unitConversion = {
-  // Convert from any temperature unit to Kelvin
-  toKelvin(value: number, fromUnit: TemperatureUnit): number {
-    switch (fromUnit) {
-      case 'celsius': 
-        return value + 273.15;
-      case 'fahrenheit': 
-        return (value - 32) * 5/9 + 273.15;
-      case 'kelvin':
-        return value;
-    }
-  },
-  
-  // Convert from Kelvin to any temperature unit
-  fromKelvin(value: number, toUnit: TemperatureUnit): number {
-    switch (toUnit) {
-      case 'celsius': 
-        return value - 273.15;
-      case 'fahrenheit': 
-        return (value - 273.15) * 9/5 + 32;
-      case 'kelvin':
-        return value;
-    }
+// Unit conversion utility functions (now imported from dedicated unit modules)
+export { temperatureConversion, pressureConversion, combinedConversions, waterChemistryConversion };
+
+// Store methods for unit conversion
+export const storeActions = {
+  /**
+   * Convert water chemistry concentrations when unit preference changes
+   */
+  convertWaterChemistryUnits(
+    fromUnit: WaterChemistryUnit, 
+    toUnit: WaterChemistryUnit,
+    temperature: number = 298.15 // Default to 25°C in Kelvin
+  ) {
+    const tempC = temperature - 273.15; // Convert Kelvin to Celsius for conversion calculations
+    
+    // Convert all concentrations
+    store.simulationInput.concentrations = waterChemistryConversion.convert(
+      store.simulationInput.concentrations,
+      fromUnit,
+      toUnit,
+      tempC
+    );
+    
+    // Update the unit preference
+    store.unitPreferences.concentrationUnit = toUnit;
   },
 
-  // Convert from any pressure unit to MPa
-  toMPa(value: number, fromUnit: PressureUnit): number {
-    switch (fromUnit) {
-      case 'bar': 
-        return value * 0.1; // 1 bar = 0.1 MPa
-      case 'atm': 
-        return value * 0.101325; // 1 atm = 0.101325 MPa
-      case 'psi': 
-        return value * 0.00689476; // 1 psi = 0.00689476 MPa
-      case 'mpa':
-        return value;
-    }
-  },
-  
-  // Convert from MPa to any pressure unit
-  fromMPa(value: number, toUnit: PressureUnit): number {
-    switch (toUnit) {
-      case 'bar': 
-        return value * 10; // 1 MPa = 10 bar
-      case 'atm': 
-        return value / 0.101325; // 1 MPa = 9.86923 atm
-      case 'psi': 
-        return value / 0.00689476; // 1 MPa = 145.038 psi
-      case 'mpa':
-        return value;
-    }
-  },
-
-  // Check if CO2 is in supercritical conditions
-  isCO2Supercritical(temperatureK: number, pressureMPa: number): boolean {
-    return temperatureK > CO2_CRITICAL_POINT.temperature && pressureMPa > CO2_CRITICAL_POINT.pressure;
+  /**
+   * Get current temperature in Celsius for conversions
+   */
+  getCurrentTemperatureC(): number {
+    return store.simulationInput.temperature - 273.15;
   }
 };

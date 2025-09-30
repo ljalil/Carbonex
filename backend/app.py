@@ -290,9 +290,6 @@ def simulate_mineralization_var_p_endpoint():
             "plot_data": plot_data
         }
 
-        print('mineralization varying pressure', flush=True)
-        print(result, flush=True)
-
         return jsonify({
             "status": "success",
             "message": "Mineralization simulation with varying pressure completed successfully",

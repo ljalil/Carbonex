@@ -43,7 +43,7 @@
             style="flex: 1"
           >
             <template #suffix>
-              <span>moles</span>
+              <span>{{ formationMineralogyConversion.getUnitLabel(store.unitPreferences.mineralogyUnit) }}</span>
             </template>
           </el-input-number>
         </el-form-item>
@@ -56,8 +56,9 @@
 
 <script setup lang="ts">
 // Vue imports
-import { computed } from 'vue'; // may not be needed
+import { computed, watch, ref } from 'vue';
 import { store } from '../store';
+import { formationMineralogyConversion } from '../units';
 import { Plus } from '@element-plus/icons-vue';
 
 type MineralName =
@@ -69,43 +70,83 @@ type MineralName =
   | 'Calcite'
   | 'Dolomite'
   | 'Siderite'
-  | 'Chlorite';
+  | 'Chlorite'
+  | 'Pyrite';
 
-// List of all minerals
+// List of all minerals (only those that exist in the store)
 const minerals: MineralName[] = [
   'Quartz', 'Albite', 'K-feldspar', 'Illite',
   'Kaolinite', 'Calcite', 'Dolomite',
-'Siderite', 'Chlorite'
+'Siderite', 'Chlorite', 'Pyrite'
 ];
 // Grouped mineral categories
 const carbonates: MineralName[] = ['Calcite', 'Siderite', 'Dolomite'];
-const clays: MineralName[] = ['Illite', 'Kaolinite'];
+const clays: MineralName[] = ['Illite', 'Kaolinite', 'Chlorite'];
 const feldspars: MineralName[] = ['Albite', 'K-feldspar'];
 const quartzGroup: MineralName[] = ['Quartz'];
-const other: MineralName[] = minerals.filter(m =>
-  ![...carbonates, ...clays, ...feldspars, ...quartzGroup].includes(m)
-) as MineralName[];
+const sulfides: MineralName[] = ['Pyrite'];
 // Map group names to their mineral arrays
 const mineralGroups: Record<string, MineralName[]> = {
   Carbonates: carbonates,
   Clays: clays,
   Feldspars: feldspars,
   Quartz: quartzGroup,
-  Other: other
+  Sulfides: sulfides
 };
 // Import presets for mineralogy
 import mineralogyPresets from '@/presets/mineralogyPresets.json';
-// Cast imported JSON for TS indexing
-const presets = (mineralogyPresets as unknown) as Record<string, Partial<Record<MineralName, number>>>;
+// Cast imported JSON for TS indexing - presets may contain more minerals than store
+const presets = (mineralogyPresets as unknown) as Record<string, Record<string, number>>;
 // Available preset options
 const presetOptions = Object.keys(presets);
+
+// Keep track of the previous unit to handle conversions
+const previousUnit = ref(store.unitPreferences.mineralogyUnit);
+
 // Apply selected preset values to store
 const updateMineralogyPreset = (preset: string) => {
   const values = presets[preset] || {};
-  for (const m of minerals) {
-    store.simulationInput.minerals[m] = values[m] ?? 0;
+  
+  if (store.unitPreferences.mineralogyUnit === 'moles') {
+    // Convert from weight fraction to moles
+    // Only include minerals that exist in both preset and store
+    const wtFracValues: Record<string, number> = {};
+    for (const m of minerals) {
+      wtFracValues[m] = values[m] ?? 0;
+    }
+    
+    const molesValues = formationMineralogyConversion.toMoles(wtFracValues, 'w/w');
+    
+    // Apply converted values to store
+    for (const m of minerals) {
+      store.simulationInput.minerals[m] = molesValues[m] ?? 0;
+    }
+  } else {
+    // Already in w/w format, only apply store minerals
+    for (const m of minerals) {
+      store.simulationInput.minerals[m] = values[m] ?? 0;
+    }
   }
 };
+
+// Watch for unit changes and convert mineral values
+watch(() => store.unitPreferences.mineralogyUnit, (newUnit, oldUnit) => {
+  if (newUnit !== oldUnit && oldUnit) {
+    // Convert current mineral values to new unit
+    const currentMinerals = { ...store.simulationInput.minerals };
+    const convertedMinerals = formationMineralogyConversion.convert(
+      currentMinerals, 
+      oldUnit, 
+      newUnit
+    );
+    
+    // Update store with converted values
+    for (const mineral of minerals) {
+      store.simulationInput.minerals[mineral] = convertedMinerals[mineral] ?? 0;
+    }
+  }
+  previousUnit.value = newUnit;
+});
 </script>
 
 <style scoped>

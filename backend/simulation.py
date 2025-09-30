@@ -213,7 +213,8 @@ def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy,
         'Kaolinite': 'Kaolinite',
         'K-feldspar': 'K-feldspar',
         'Albite': 'Albite',
-        'Chlorite': 'Chlorite(14A)'
+        'Chlorite': 'Chlorite(14A)',
+        'Pyrite': 'Pyrite'
     }
     
     for mineral_key, phreeqc_name in mineral_names.items():
@@ -576,7 +577,8 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
         'Kaolinite': 'Kaolinite',
         'K-feldspar': 'K-feldspar',
         'Albite': 'Albite',
-        'Chlorite': 'Chlorite(14A)'
+        'Chlorite': 'Chlorite(14A)',
+        'Pyrite': 'Pyrite'
     }
     
     for mineral_key, phreeqc_name in mineral_names.items():
