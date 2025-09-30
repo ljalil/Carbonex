@@ -28,7 +28,7 @@
       <el-col :span="10">
         <!-- Dissolved CO2 card -->
          <SingleValueCard 
-           title="Dissolved CO<sub>2</sub>"
+           title="Dissolved and mineralized CO<sub>2</sub>"
            :value="store.simulationOutput.mineralTrapping.dissolved_co2"
            unit="mol/kg"
          />
@@ -86,10 +86,47 @@ const formatIonName = (ion: string) => ionNameMapping[ion] || ion;
 
 const activityData = computed(() => {
   const mineralEqui = simulationOutput.value.mineralTrapping.mineral_equi || {};
-  return Object.entries(mineralEqui).map(([mineral, delta]) => ({
-    label: mineral.charAt(0).toUpperCase() + mineral.slice(1), // Capitalize first letter
-    value: delta
-  }));
+  const initialMinerals = simulationOutput.value.mineralTrapping.initial_minerals || {}; // Use stored snapshot instead of current user input
+  
+  // Get all unique mineral names from both initial input and final amounts from backend
+  const allMinerals = new Set([
+    ...Object.keys(initialMinerals),
+    ...Object.keys(mineralEqui)
+  ]);
+  
+  // Filter out minerals that have zero values in both initial and final
+  const relevantMinerals = Array.from(allMinerals).filter(mineral => {
+    const initialAmount = initialMinerals[mineral] || 0;
+    const finalAmount = mineralEqui[mineral] || 0; // Backend returns final amounts, not deltas
+    return initialAmount > 0 || finalAmount > 0;
+  });
+  
+  // Prepare categories and series data
+  const categories = relevantMinerals.map(mineral => 
+    mineral.charAt(0).toUpperCase() + mineral.slice(1)
+  );
+  
+  const initialAmounts = relevantMinerals.map(mineral => 
+    initialMinerals[mineral] || 0 // Use stored initial minerals snapshot
+  );
+  
+  const finalAmounts = relevantMinerals.map(mineral => 
+    mineralEqui[mineral] || 0 // Use backend values directly as final amounts
+  );
+  
+  return {
+    categories,
+    series: [
+      {
+        name: 'Initial',
+        data: initialAmounts
+      },
+      {
+        name: 'Final',
+        data: finalAmounts
+      }
+    ]
+  };
 });
 </script>
 

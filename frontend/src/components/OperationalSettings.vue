@@ -43,7 +43,13 @@
     <!--<CO2PhaseDiagram></CO2PhaseDiagram>-->
 
        <template #footer>
-    <el-text >Phase: Supercritical</el-text>
+      <el-alert 
+        :title="isSupercritical ? 'Supercritical state' : 'Subcritical state'"
+        center
+        :type="isSupercritical ? 'success' : 'warning'"
+        show-icon 
+        :closable="false" 
+      />
     </template>
   </el-card>
   
@@ -51,7 +57,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { store, unitConversion } from '../store'
+import { store, unitConversion, CO2_CRITICAL_POINT } from '../store'
 import CO2PhaseDiagram from './CO2PhaseDiagram.vue'
 
 // Unit labels
@@ -79,6 +85,11 @@ const pressureUnitLabel = computed(() => {
     case 'mpa': return 'MPa'
     default: return 'bar'
   }
+})
+
+// Check if CO2 is in supercritical conditions
+const isSupercritical = computed(() => {
+  return unitConversion.isCO2Supercritical(store.simulationInput.temperature, store.simulationInput.pressure)
 })
 
 // Displayed values

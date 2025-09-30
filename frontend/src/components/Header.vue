@@ -1,6 +1,6 @@
 <template>
     <div id="header">
-    <h1>Carbonex <el-text>A batch simulator for CO<sub>2</sub> trapping.</el-text></h1>
+    <h1>Carbonex <el-text>A batch simulator for CO<sub>2</sub> solubility and mineral trapping.</el-text></h1>
 
     <div id="links-and-controls">
         

@@ -7,11 +7,11 @@ export async function runStaticSimulation() {
       concentrations: store.simulationInput.concentrations,
       temperature: store.simulationInput.temperature,
       pressure: store.simulationInput.pressure,
-      model: store.simulationInput.model,
+      model: store.simulationInput.solubilityModel,
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/solubility/fixed",
+      "http://127.0.0.1:5000/simulate/co2_brine/fixed",
       payload
     );
 
@@ -41,7 +41,7 @@ export async function runSimulation() {
       concentrations: store.simulationInput.concentrations,
       temperature: store.simulationInput.temperature,
       pressure: store.simulationInput.pressure,
-      model: store.simulationInput.model
+      model: store.simulationInput.solubilityModel
     };
 
     const response = await axios.post(
@@ -91,11 +91,11 @@ export async function runSimulationWithVaryingPressure() {
     const payload = {
       concentrations: store.simulationInput.concentrations,
       temperature: store.simulationInput.temperature,
-      model: store.simulationInput.model
+      model: store.simulationInput.solubilityModel
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/solubility/var-p",
+      "http://127.0.0.1:5000/simulate/co2_brine/var-p",
       payload
     );
 
@@ -118,11 +118,11 @@ export async function runSimulationWithVaryingTemperature() {
     const payload = {
       concentrations: store.simulationInput.concentrations,
       pressure: store.simulationInput.pressure,
-      model: store.simulationInput.model
+      model: store.simulationInput.solubilityModel
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/solubility/var-t",
+      "http://127.0.0.1:5000/simulate/co2_brine/var-t",
       payload
     );
 
@@ -140,40 +140,6 @@ export async function runSimulationWithVaryingTemperature() {
   }
 }
 
-export async function runSimulationWithVaryingPressureTemperature() {
-  try {
-    const payload = {
-      concentrations: store.simulationInput.concentrations,
-      model: store.simulationInput.model
-    };
-
-    const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/solubility/var-pt",
-      payload
-    );
-
-    const responseData = response.data.data;
-
-    // CORRECT: Update the heatmap data
-    store.simulationOutput.solubilityTrapping.heatmapData = {
-      grid_data: responseData.grid_data || [],
-      temperatures: responseData.temperatures || [],
-      pressures: responseData.pressures || []
-    };
-
-    console.log("Heatmap data updated with varying pressure-temperature results:", store.simulationOutput.solubilityTrapping.heatmapData);
-
-  } catch (error) {
-    console.error("Error during varying pressure-temperature simulation:", error);
-    // On error, reset the heatmap data
-    store.simulationOutput.solubilityTrapping.heatmapData = {
-      grid_data: [],
-      temperatures: [],
-      pressures: []
-    };
-  }
-}
-
 export async function runBrineRockSimulation() {
   try {
     const payload = {
@@ -181,7 +147,7 @@ export async function runBrineRockSimulation() {
       temperature: store.simulationInput.temperature,
       pressure: store.simulationInput.pressure,
       mineralogy: store.simulationInput.minerals,
-      model: store.simulationInput.model
+      model: store.simulationInput.primaryModel
     };
 
     const response = await axios.post(
@@ -191,6 +157,9 @@ export async function runBrineRockSimulation() {
 
     if (response.data.status === "success" && response.data.data) {
       const data = response.data.data;
+      
+      // Store a snapshot of the initial minerals from when the simulation was run
+      store.simulationOutput.mineralTrapping.initial_minerals = { ...store.simulationInput.minerals };
       
       // Update mineralTrapping with all returned values
       store.simulationOutput.mineralTrapping.dissolved_co2 = typeof data.dissolved_co2 === 'string' 
@@ -234,6 +203,7 @@ export async function runBrineRockSimulation() {
       fugacity_co2: 0,
       partial_pressure_co2: 0,
       mineral_equi: {},
+      initial_minerals: {},
       plotDataPressure: [],
       plotDataTemperature: []
     };
@@ -246,11 +216,11 @@ export async function runMineralizationWithVaryingPressure() {
       concentrations: store.simulationInput.concentrations,
       temperature: store.simulationInput.temperature,
       mineralogy: store.simulationInput.minerals,
-      model: store.simulationInput.model
+      model: store.simulationInput.primaryModel
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/mineralization/var-p",
+      "http://127.0.0.1:5000/simulate/co2_brine_rock/var-p",
       payload
     );
 
@@ -274,11 +244,11 @@ export async function runMineralizationWithVaryingTemperature() {
       concentrations: store.simulationInput.concentrations,
       pressure: store.simulationInput.pressure,
       mineralogy: store.simulationInput.minerals,
-      model: store.simulationInput.model
+      model: store.simulationInput.primaryModel
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/mineralization/var-t",
+      "http://127.0.0.1:5000/simulate/co2_brine_rock/var-t",
       payload
     );
 
@@ -303,16 +273,19 @@ export async function runMineralizationFixedState() {
       temperature: store.simulationInput.temperature,
       pressure: store.simulationInput.pressure,
       mineralogy: store.simulationInput.minerals,
-      model: store.simulationInput.model
+      model: store.simulationInput.primaryModel
     };
 
     const response = await axios.post(
-      "http://127.0.0.1:5000/simulate/mineralization/fixed",
+      "http://127.0.0.1:5000/simulate/co2_brine_rock/fixed",
       payload
     );
 
     if (response.data.status === "success" && response.data.data) {
       const data = response.data.data;
+      
+      // Store a snapshot of the initial minerals from when the simulation was run
+      store.simulationOutput.mineralTrapping.initial_minerals = { ...store.simulationInput.minerals };
       
       // Update mineralTrapping with all returned values
       store.simulationOutput.mineralTrapping.dissolved_co2 = typeof data.dissolved_co2 === 'string' 

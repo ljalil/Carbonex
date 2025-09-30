@@ -1,6 +1,6 @@
 <template>
   <div class="bar-plot-container">
-    <v-chart class="chart" v-if="data.length !== 0" :option="chartOption" autoresize />
+    <v-chart class="chart" v-if="hasData" :option="chartOption" autoresize />
     <div class="no-plot" v-else>
       <h2>No data to display</h2>
       <p>Run simulation to display the resulting bar chart.</p>
@@ -31,15 +31,19 @@ use([
 // Provide the theme for the chart
 provide(THEME_KEY, 'dark');
 
+// Define the data types
+type SingleSeriesData = {label: string, value: number}[];
+type MultiSeriesData = {categories: string[], series: {name: string, data: number[]}[]};
+
 export default defineComponent({
   name: 'BarPlot',
   components: {
     VChart,
   },
   props: {
-    // Array of objects with label and value properties
+    // Array of objects with label and value properties, or multi-series data
     data: {
-      type: Array as PropType<{label: string, value: number}[]>,
+      type: [Array, Object] as PropType<SingleSeriesData | MultiSeriesData>,
       required: true,
     },
     xAxisLabel: {
@@ -54,58 +58,127 @@ export default defineComponent({
 
   },
   setup(props) {
-    const chartOption = computed(() => ({
+    const isMultiSeries = computed(() => {
+      return !Array.isArray(props.data);
+    });
 
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        },
-        formatter: function(params: any) {
-          const value = params[0].value.toFixed(4);
-          return `${params[0].name}: ${value}`;
-        }
-      },
-      grid: {
-        left: '5%',
-        right: '5%',
-        bottom: '15%',
-        top: '5%',
-        containLabel: true,
-      },
-      // Configure vertical bar orientation with category x-axis and value y-axis
-      xAxis: {
-        type: 'category',
-        data: props.data.map(item => item.label),
-        name: props.xAxisLabel,
-        nameLocation: 'center',
-        nameGap: 50,
-        axisTick: { alignWithLabel: true, rotation: 90 },
-        axisLabel: {
-          interval: 0,
-          rotate: 90,
-          formatter: (value: string) => value
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: props.yAxisLabel,
-        nameLocation: 'center',
-        nameGap: 30,
-        min: 0,
-        max: 1,
-      },
-      series: [
-        {
-          type: 'bar',
-          data: props.data.map(item => item.value),
-          itemStyle: { color: '#409EFF' }
-        }
-      ],
-    }));
+    const hasData = computed(() => {
+      if (isMultiSeries.value) {
+        const multiData = props.data as MultiSeriesData;
+        return multiData.categories.length > 0 && multiData.series.length > 0;
+      } else {
+        const singleData = props.data as SingleSeriesData;
+        return singleData.length > 0;
+      }
+    });
+
+    const chartOption = computed(() => {
+      if (isMultiSeries.value) {
+        const multiData = props.data as MultiSeriesData;
+        
+        return {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          legend: {
+            data: multiData.series.map(s => s.name)
+          },
+          grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '15%',
+            top: '15%',
+            containLabel: true,
+          },
+          xAxis: {
+            type: 'category',
+            data: multiData.categories,
+            name: props.xAxisLabel,
+            nameLocation: 'center',
+            nameGap: 50,
+            axisTick: { alignWithLabel: true },
+            axisLabel: {
+              interval: 0,
+              rotate: 45,
+              formatter: (value: string) => value
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: props.yAxisLabel,
+            nameLocation: 'center',
+            nameGap: 50
+          },
+          series: multiData.series.map((seriesItem, index) => ({
+            name: seriesItem.name,
+            type: 'bar',
+            data: seriesItem.data,
+            barGap: 0,
+            emphasis: {
+              focus: 'series'
+            },
+            itemStyle: { 
+              color: index === 0 ? '#67C23A' : '#409EFF' // Green for initial, blue for final
+            }
+          }))
+        };
+      } else {
+        const singleData = props.data as SingleSeriesData;
+        
+        return {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            },
+            formatter: function(params: any) {
+              const value = params[0].value.toFixed(4);
+              return `${params[0].name}: ${value}`;
+            }
+          },
+          grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '15%',
+            top: '5%',
+            containLabel: true,
+          },
+          xAxis: {
+            type: 'category',
+            data: singleData.map(item => item.label),
+            name: props.xAxisLabel,
+            nameLocation: 'center',
+            nameGap: 50,
+            axisTick: { alignWithLabel: true, rotation: 90 },
+            axisLabel: {
+              interval: 0,
+              rotate: 90,
+              formatter: (value: string) => value
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: props.yAxisLabel,
+            nameLocation: 'center',
+            nameGap: 30
+          },
+          series: [
+            {
+              type: 'bar',
+              data: singleData.map(item => item.value),
+              itemStyle: { color: '#409EFF' }
+            }
+          ],
+        };
+      }
+    });
 
     return {
       chartOption,
+      hasData,
     };
   },
 });

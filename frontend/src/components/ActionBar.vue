@@ -25,7 +25,7 @@
   
   <script setup lang="ts" >
   import { CaretRight } from "@element-plus/icons-vue";
-  import { runSimulation, runSimulationWithVaryingPressure, runSimulationWithVaryingTemperature, runSimulationWithVaryingPressureTemperature, runStaticSimulation, runBrineRockSimulation } from "../actions"; // Added import for heatmap function
+  import { runSimulation, runSimulationWithVaryingPressure, runSimulationWithVaryingTemperature, runStaticSimulation, runBrineRockSimulation, runMineralizationWithVaryingPressure, runMineralizationWithVaryingTemperature } from "../actions"; // Added import for heatmap function
   import { ref, defineEmits } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import UnitsSettings from "./UnitsSettings.vue";
@@ -41,8 +41,9 @@ import UnitsSettings from "./UnitsSettings.vue";
     runSimulation()
     runSimulationWithVaryingPressure()
     runSimulationWithVaryingTemperature()
-    runSimulationWithVaryingPressureTemperature()
     runBrineRockSimulation()
+    runMineralizationWithVaryingPressure()
+    runMineralizationWithVaryingTemperature()
     emit('run-simulation-clicked')
   }
   </script>

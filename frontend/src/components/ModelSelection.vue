@@ -10,12 +10,12 @@
       <el-form-item label="Main model">
         <el-select
           size="small"
-          v-model="store.simulationInput.model"
+          v-model="store.simulationInput.primaryModel"
           placeholder="Select model"
           style="width: 100%"
         >
           <el-option
-            v-for="option in modelOptions"
+            v-for="option in primaryModelOptions"
             :key="option.value"
             :label="option.label"
             :value="option.value"
@@ -25,12 +25,12 @@
             <el-form-item label="Solubility model">
         <el-select
           size="small"
-          v-model="store.simulationInput.model"
+          v-model="store.simulationInput.solubilityModel"
           placeholder="Select model"
           style="width: 100%"
         >
           <el-option
-            v-for="option in modelOptions"
+            v-for="option in solubilityModelOptions"
             :key="option.value"
             :label="option.label"
             :value="option.value"
@@ -48,7 +48,12 @@ import { store } from '../store'
 import { ElCard, ElForm, ElFormItem, ElSelect, ElOption } from 'element-plus'
 
 // Available simulation models
-const modelOptions = [
+const primaryModelOptions = [
+  { label: 'PHREEQC (phreeqc.dat)', value: 'phreeqc_phreeqc' },
+  { label: 'PHREEQC (pitzer.dat)', value: 'phreeqc_pitzer' },
+]
+
+const solubilityModelOptions = [
   { label: 'Carbonex', value: 'carbonex' },
   { label: 'PHREEQC (phreeqc.dat)', value: 'phreeqc_phreeqc' },
   { label: 'PHREEQC (pitzer.dat)', value: 'phreeqc_pitzer' },

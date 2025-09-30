@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, simulate_varying_pressure_temperature, run_state_simulation, _run_PHREEQC_brine_rock_single_state, simulate_brine_rock_varying_pressure, simulate_brine_rock_varying_temperature
+from simulation import get_solution_properties, simulate_varying_pressure, simulate_varying_temperature, run_state_simulation, _run_PHREEQC_brine_rock_single_state, simulate_brine_rock_varying_pressure, simulate_brine_rock_varying_temperature
 
 
 import numpy as np
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
 
 
 @app.route('/simulate/solution/properties', methods=['POST'])
@@ -51,7 +52,7 @@ def simulate_solution_properties():
         })
 
 
-@app.route('/simulate/solubility/var-p', methods=['POST'])
+@app.route('/simulate/co2_brine/var-p', methods=['POST'])
 def simulate_solubility_var_p_endpoint():
     try:
         data = request.json
@@ -90,7 +91,7 @@ def simulate_solubility_var_p_endpoint():
         })
 
 
-@app.route('/simulate/solubility/var-t', methods=['POST'])
+@app.route('/simulate/co2_brine/var-t', methods=['POST'])
 def simulate_solubility_var_t_endpoint():
     try:
         data = request.json
@@ -124,40 +125,7 @@ def simulate_solubility_var_t_endpoint():
             "message": str(e)
         })
 
-
-@app.route('/simulate/solubility/var-pt', methods=['POST'])
-def simulate_solubility_var_pt_endpoint():
-    try:
-        data = request.json
-
-        concentrations = data.get('concentrations')
-        model = data.get('model')
-
-        # Call the simulate_varying_pressure_temperature function
-        result = simulate_varying_pressure_temperature(ion_moles=concentrations, model=model)
-        
-        response_data = {
-            "grid_data": result['grid_data'],
-            "temperatures": result['temperatures'],
-            "pressures": result['pressures']
-        }
-
-
-        return jsonify({
-            "status": "success",
-            "message": "Simulation with varying pressure and temperature completed successfully",
-            "data": response_data
-        })
-
-    except Exception as e:
-        print(f"Error from varying pressure-temperature: {e}")
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        })
-
-
-@app.route('/simulate/solubility/fixed', methods=['POST'])
+@app.route('/simulate/co2_brine/fixed', methods=['POST'])
 def simulate_solubility_fixed_endpoint():
     try:
         data = request.json
@@ -250,7 +218,7 @@ def simulate_rock_brine_single_state_endpoint():
         })
 
 
-@app.route('/simulate/mineralization/fixed', methods=['POST'])
+@app.route('/simulate/co2_brine_rock/fixed', methods=['POST'])
 def simulate_mineralization_fixed_endpoint():
     try:
         data = request.json
@@ -295,7 +263,7 @@ def simulate_mineralization_fixed_endpoint():
         })
 
 
-@app.route('/simulate/mineralization/var-p', methods=['POST'])
+@app.route('/simulate/co2_brine_rock/var-p', methods=['POST'])
 def simulate_mineralization_var_p_endpoint():
     try:
         data = request.json
@@ -304,8 +272,7 @@ def simulate_mineralization_var_p_endpoint():
         concentrations = data.get('concentrations')
         mineralogy = data.get('mineralogy', {})
         model = data.get('model', 'phreeqc')
-        print('running mineralization simulation with varying pressure, model', model, flush=True)
-        
+
         # Call the simulate_brine_rock_varying_pressure function
         result = simulate_brine_rock_varying_pressure(
             temperature=temperature, 
@@ -323,6 +290,9 @@ def simulate_mineralization_var_p_endpoint():
             "plot_data": plot_data
         }
 
+        print('mineralization varying pressure', flush=True)
+        print(result, flush=True)
+
         return jsonify({
             "status": "success",
             "message": "Mineralization simulation with varying pressure completed successfully",
@@ -337,7 +307,7 @@ def simulate_mineralization_var_p_endpoint():
         })
 
 
-@app.route('/simulate/mineralization/var-t', methods=['POST'])
+@app.route('/simulate/co2_brine_rock/var-t', methods=['POST'])
 def simulate_mineralization_var_t_endpoint():
     try:
         data = request.json
@@ -346,7 +316,7 @@ def simulate_mineralization_var_t_endpoint():
         concentrations = data.get('concentrations')
         mineralogy = data.get('mineralogy', {})
         model = data.get('model', 'phreeqc')
-        print('running mineralization simulation with varying temperature, model', model, flush=True)
+
         
         # Call the simulate_brine_rock_varying_temperature function
         result = simulate_brine_rock_varying_temperature(
@@ -378,6 +348,9 @@ def simulate_mineralization_var_t_endpoint():
             "message": str(e)
         })
 
+@app.route('/utilities/AI-insights', methods=['POST'])
+def get_AI_insights(pressure, temperature, concentrations):
+    prompt = f"I conducted a simulation for CO2 solubility and mineralization under a certain pressure and temperature conditions. I will give you the results and you give me a brief description of main findings and your remarks on this simulation results. This is intended to be embedded in a UI for the user as an AI summary, so skip any introductory text and keep it brief and formal. Provide insights into the geochemistry to the end user rather than just providing a commentary on the results. === Pressure and temperature === - Pressure: {pressure} MPa - temperature: {temperature} K === solubility === - Initial brine composition (mol/kgw): -- Na+: 0.4690 -- K+: 0.0102 -- Cl-: 0.5460 -- Mg+2: 0.0528 -- Ca+2: 0.0103 -- SO4-2: 0.0282 - Solution density: 1.0346 g/cm - Ionic strength: 0.6927 mol/kgw - pH: 3.1205 - Activity coefficients: -- Na+: 0.6717 -- Cl-: 0.6269 -- K+: 0.1189 -- Mg+2: 0.1820 -- Ca+2: 0.0864 -- SO4-2: 0.0789 -- HCO3-:0.0448 -- CO3-2: 0 - Dissolved CO2 due to solubility only: 1.1640 mol/kgw === solubility + mineralization === - Solution density: 1.0539 g/cm - Ionic strength: 0.8929 mol/kgw - pH: 5.4812 - Formation mineralogy change (moles): -- Quartz: 0.25 -> 0.9099 -- Albite: 0.1 -> 0 -- K-feldspar: 0.05 -> 0 -- Illite: 0.3 -> 0 -- Kaolinite: 0.1 -> 0.52 -- Calcite: 0.05 -> 0 -- Dolomite: 0.05 -> 0.10952 - Dissolved CO2 due to solubility and mineralization: 1.5133 mol/kgw"
 
 if __name__ == '__main__':
 

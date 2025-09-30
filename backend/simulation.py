@@ -97,9 +97,6 @@ def get_solution_properties(temperature, pressure, species):
             'molar_volume': round(molar_volume_value if molar_volume_value >= threshold else 0, 4)
         })
 
-        print(species_data, flush=True)
-
-
 
     # Handle potential missing keys safely
     try:
@@ -184,7 +181,7 @@ def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
 
     return result
 
-def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, database):
+def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, database='phreeqc'):
     """
     Run PHREEQC simulation for CO2-brine-rock interaction over a pressure range.
     
@@ -208,15 +205,15 @@ def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy,
     # Build mineral phases section based on mineralogy dict
     mineral_phases = []
     mineral_names = {
-        'quartz': 'Quartz',
-        'calcite': 'Calcite', 
-        'siderite': 'Siderite',
-        'dolomite': 'Dolomite',
-        'illite': 'Illite',
-        'kaolinite': 'Kaolinite',
-        'k_feldspar': 'K-feldspar',
-        'albite': 'Albite',
-        'chlorite': 'Chlorite(14A)'
+        'Quartz': 'Quartz',
+        'Calcite': 'Calcite', 
+        'Siderite': 'Siderite',
+        'Dolomite': 'Dolomite',
+        'Illite': 'Illite',
+        'Kaolinite': 'Kaolinite',
+        'K-feldspar': 'K-feldspar',
+        'Albite': 'Albite',
+        'Chlorite': 'Chlorite(14A)'
     }
     
     for mineral_key, phreeqc_name in mineral_names.items():
@@ -231,7 +228,7 @@ def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy,
     
     # Replace template placeholders with actual values
     database_path = f'/usr/local/share/doc/phreeqc/database/{database}.dat'
-    output_file = os.path.join(temp_files_path, "co2_brine_rock.tsv")
+    output_file = os.path.join(temp_files_path, "co2_brine_rock_var_p.tsv")
     
     phreeqc_code = phreeqc_code.replace('__DATABASE__', database_path)
     phreeqc_code = phreeqc_code.replace('__TEMPERATURE__', str(temperature_c))
@@ -243,16 +240,15 @@ def _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy,
     phreeqc_code = phreeqc_code.replace('__SO4__', str(ion_moles.get("SO4-2", 0)))
     phreeqc_code = phreeqc_code.replace('__HCO3__', str(ion_moles.get("HCO3-", 0)))
     phreeqc_code = phreeqc_code.replace('__MINERAL_PHASES__', mineral_phases_str)
+    phreeqc_code = phreeqc_code.replace('__OUTPUT_FILE__', output_file)
 
-    filename = 'co2_brine_rock_varying_pressure.pqi'
-
+    filename = 'co2_brine_rock_var_pressure.pqi'
     pqi = open(os.path.join(temp_files_path, filename), 'w')
     pqi.write(phreeqc_code)
     pqi.close()
 
     subprocess.run(['phreeqc', f"{os.path.join(temp_files_path, filename)}", f"{os.path.join(temp_files_path, filename).replace('.pqi', '.pqo')}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
-    # Read data using standard csv module instead of pandas
     result = {'Pressure (MPa)': [], 'Dissolved CO2 (mol/kg)': []}
     
     with open(output_file, mode='r') as file:
@@ -310,7 +306,7 @@ def _simulate_varying_pressure_DuanSun(temperature, ion_moles):
     Use Duan and Sun (2006) model to calculate CO2 solubility over a pressure range.
     Returns dict with lists for 'Pressure (MPa)' and 'Dissolved CO2 (mol/kg)'.
     """
-    print('from _simulate_varying_pressure_DuanSun', flush=True)
+
     model = DuanSun2006.DuanSun2006()
     # Define pressure range: start, end, step (MPa)
     P_start = 0.1
@@ -363,7 +359,7 @@ def _simulate_varying_temperature_DuanSun(pressure, ion_moles):
     Use Duan and Sun (2006) model to calculate CO2 solubility over a temperature range.
     Returns dict with lists for 'Temperature (K)' and 'Dissolved CO2 (mol/kg)'.
     """
-    print('from _simulate_varying_temperature_DuanSun', flush=True)
+
     model = DuanSun2006.DuanSun2006()
     
     # Define temperature range: start, end, step (K)
@@ -414,7 +410,6 @@ def simulate_varying_temperature(pressure, ion_moles, model):
     elif model == 'phreeqc_pitzer':
         result = _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database='pitzer')
     elif model == 'duan_sun_2006':
-        print('using duan sun model for varying temperature', flush=True)
         result = _simulate_varying_temperature_DuanSun(pressure, ion_moles)
     elif model == 'carbonex':
         result = _simulate_varying_temperature_Carbonex(pressure, ion_moles)
@@ -519,68 +514,6 @@ def _run_Duan_Sun_state_simulation(temperature, pressure, species):
         dissolved_co2 = 0
     return dissolved_co2
 
-def simulate_varying_pressure_temperature(ion_moles, model):
-    """
-    Calculate CO2 solubility over a grid of pressure and temperature values.
-    Returns dict with grid data suitable for heatmap visualization.
-    """
-    # Define pressure range: start, end, step (MPa)
-    P_start = 1
-    P_end = 101.0
-    P_step = 1.0
-    
-    # Define temperature range: start, end, step (K)
-    T_start = 273.15  # 0°C
-    T_end = 583.15   # 100°C
-    T_step = 1.0     # 5K steps
-    
-    # Generate pressure and temperature arrays
-    pressures = []
-    temperatures = []
-    
-    pressure = P_start
-    while pressure <= P_end:
-        pressures.append(pressure)
-        pressure += P_step
-        
-    temperature = T_start
-    while temperature <= T_end:
-        temperatures.append(temperature)
-        temperature += T_step
-    
-    # Generate grid data
-    grid_data = []
-    
-    for i, temp in enumerate(temperatures):
-        for j, press in enumerate(pressures):
-            try:
-                if model in ['phreeqc_phreeqc', 'phreeqc_pitzer']:
-                    database = 'phreeqc' if model == 'phreeqc_phreeqc' else 'pitzer'
-                    dissolved_co2 = _run_PHREEQC_state_simulation(temp, press, ion_moles, database)
-                elif model == 'duan_sun_2006':
-                    dissolved_co2 = _run_Duan_Sun_state_simulation(temp, press, ion_moles)
-                elif model == 'carbonex':
-                    # Placeholder - could implement proper Carbonex model
-                    dissolved_co2 = 3.0
-                else:
-                    dissolved_co2 = 0.0
-                
-                # Format: [temperature_index, pressure_index, co2_solubility]
-                grid_data.append([i, j, dissolved_co2])
-                
-            except Exception as e:
-                print(f"Error at T={temp}K, P={press}MPa: {e}")
-                # Use 0 for failed calculations
-                grid_data.append([i, j, 0.0])
-    
-    result = {
-        'grid_data': grid_data,
-        'temperatures': temperatures,
-        'pressures': pressures
-    }
-    
-    return result
-
 def run_state_simulation(temperature, pressure, species, model):
     if model == 'phreeqc_phreeqc':
         dissolved_co2 = _run_PHREEQC_state_simulation(temperature, pressure, species, database='phreeqc')
@@ -635,15 +568,15 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
     # Build mineral phases section based on mineralogy dict
     mineral_phases = []
     mineral_names = {
-        'quartz': 'Quartz',
-        'calcite': 'Calcite', 
-        'siderite': 'Siderite',
-        'dolomite': 'Dolomite',
-        'illite': 'Illite',
-        'kaolinite': 'Kaolinite',
-        'k_feldspar': 'K-feldspar',
-        'albite': 'Albite',
-        'chlorite': 'Chlorite(14A)'
+        'Quartz': 'Quartz',
+        'Calcite': 'Calcite', 
+        'Siderite': 'Siderite',
+        'Dolomite': 'Dolomite',
+        'Illite': 'Illite',
+        'Kaolinite': 'Kaolinite',
+        'K-feldspar': 'K-feldspar',
+        'Albite': 'Albite',
+        'Chlorite': 'Chlorite(14A)'
     }
     
     for mineral_key, phreeqc_name in mineral_names.items():
@@ -723,6 +656,7 @@ def _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineral
                 mineral_equi[mineral_key] = float(results.get(delta_key, 0))
             else:
                 mineral_equi[mineral_key] = 0
+
                 
     except (ValueError, TypeError) as e:
         print(f"Error parsing results: {e}", flush=True)
@@ -755,16 +689,9 @@ if __name__ == "__main__":
     mineralogy = {'calcite': 10.0, 'quartz': 5.0}  # Basic minerals
     model = 'phreeqc'
     
-    print(f"Running CO2-brine-rock simulation at {temperature-273.15}°C and {pressure} MPa")
-    
+
     result = _run_PHREEQC_brine_rock_single_state(temperature, pressure, species, mineralogy, model)
     
-    print(f"Dissolved CO2: {result['dissolved_co2']:.6f} mol/kg")
-    print(f"pH: {result['pH']:.2f}")
-    print(f"Density: {result['density']:.3f} g/cm3")
-    print(f"CO2 partial pressure: {result['partial_pressure_co2']:.6f} atm")
-    print(f"Minerals deltas: {result['mineral_equi']}")
-
 
 def simulate_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, model):
     """
@@ -779,27 +706,11 @@ def simulate_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, mod
     Returns:
         dict: Contains 'Pressure (MPa)' and 'Dissolved CO2 (mol/kg)' lists
     """
-    pressures = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]  # MPa range
-    dissolved_co2_values = []
-    
-    for pressure in pressures:
-        try:
-            result = _run_PHREEQC_brine_rock_single_state(
-                temperature=temperature,
-                pressure=pressure,
-                species=ion_moles,
-                mineralogy=mineralogy,
-                model=model
-            )
-            dissolved_co2_values.append(result['dissolved_co2'])
-        except Exception as e:
-            print(f"Error at pressure {pressure} MPa: {e}")
-            dissolved_co2_values.append(0)
-    
-    return {
-        'Pressure (MPa)': pressures,
-        'Dissolved CO2 (mol/kg)': dissolved_co2_values
-    }
+    # Use the same pattern as simulate_varying_pressure
+
+    result = _run_PHREEQC_brine_rock_varying_pressure(temperature, ion_moles, mineralogy, database='phreeqc')
+
+    return result
 
 
 def simulate_brine_rock_varying_temperature(pressure, ion_moles, mineralogy, model):

@@ -65,6 +65,7 @@ export interface MineralTrapping {
   fugacity_co2: number;
   partial_pressure_co2: number;
   mineral_equi: Record<string, number>; // Dictionary of mineral deltas
+  initial_minerals: Record<string, number>; // Snapshot of initial mineral amounts from when simulation was run
   plotDataPressure: [number, number][]; // Array of [pressure, dissolved_co2] pairs
   plotDataTemperature: [number, number][]; // Array of [temperature, dissolved_co2] pairs
 }
@@ -72,6 +73,7 @@ export interface MineralTrapping {
 interface SimulationOutput {
   solubilityTrapping: SolubilityTrapping;
   mineralTrapping: MineralTrapping;
+  aiInsights?: string; // Optional AI-generated insights based on simulation results
 }
 
 // Define available unit types
@@ -79,15 +81,23 @@ export type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
 export type PressureUnit = 'bar' | 'atm' | 'psi' | 'mpa';
 // Available concentration units for input/output
 export type ConcentrationUnit = 'mol/kg' | 'mol/L' | 'ppm';
-export type ModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
+export type PrimaryModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer';
+export type SolubilityModelType = 'phreeqc_phreeqc' | 'phreeqc_pitzer' | 'duan_sun_2006' | 'carbonex';
 export type CorrosionModelType = 'deWaald1991' | 'deWaald1995';
+
+// CO2 critical point constants
+export const CO2_CRITICAL_POINT = {
+  temperature: 304.18, // Kelvin
+  pressure: 7.38 // MPa
+} as const;
 
 interface SimulationInput {
   temperature: number; // Always stored in Kelvin (backend compatible)
   pressure: number; // Always stored in MPa (backend compatible)
   concentrations: Concentrations;
   preset?: string;
-  model: ModelType;
+  primaryModel: PrimaryModelType;
+  solubilityModel: SolubilityModelType;
   corrosionModel: CorrosionModelType;
   considerImpurities: boolean;
   streamImpurities: StreamImpurities;
@@ -120,7 +130,8 @@ export const store = reactive<{
         "HCO3-": 0,
         "CO3-2": 0
     },
-    model: 'duan_sun_2006', // Default model
+    primaryModel: 'phreeqc_phreeqc', // Default model
+    solubilityModel:'duan_sun_2006',
     corrosionModel: 'deWaald1991',
   considerImpurities: false,
   streamImpurities: {
@@ -179,9 +190,11 @@ export const store = reactive<{
       fugacity_co2: 0,
       partial_pressure_co2: 0,
       mineral_equi: {},
+      initial_minerals: {},
       plotDataPressure: [],
       plotDataTemperature: []
-    }
+    },
+    aiInsights: '' // Will be populated by backend AI analysis
   },
   unitPreferences: {
   temperatureUnit: 'kelvin',
@@ -242,5 +255,10 @@ export const unitConversion = {
       case 'mpa':
         return value;
     }
+  },
+
+  // Check if CO2 is in supercritical conditions
+  isCO2Supercritical(temperatureK: number, pressureMPa: number): boolean {
+    return temperatureK > CO2_CRITICAL_POINT.temperature && pressureMPa > CO2_CRITICAL_POINT.pressure;
   }
 };

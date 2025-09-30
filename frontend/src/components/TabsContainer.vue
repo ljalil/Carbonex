@@ -21,7 +21,6 @@
 import {
   SolubilityTrappingTab,
   MineralTrappingTab,
-  VariablePTTab,
   SensitivityAnalysisTab
 } from './tabs/index.js';
 
@@ -30,7 +29,6 @@ export default {
   components: {
     SolubilityTrappingTab,
     MineralTrappingTab,
-    VariablePTTab,
     SensitivityAnalysisTab
   },
   data() {
@@ -46,11 +44,6 @@ export default {
           name: 'mineral-trapping',
           label: 'Mineral trapping',
           component: 'MineralTrappingTab'
-        },
-        {
-          name: 'variable-pt',
-          label: 'Variable P-T',
-          component: 'VariablePTTab'
         },
         {
           name: 'sensitivity-analysis',
