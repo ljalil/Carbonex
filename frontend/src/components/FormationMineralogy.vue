@@ -50,13 +50,24 @@
       </template>
     </el-form>
 
-        <el-alert style="margin-top: 10px !important;" :closable="false">Value of 0 allows the mineral to precipitate. Values below 0 prohibits its precipitation.</el-alert>
+        <el-alert style="margin-top: 10px !important;" :closable="false">Value of 0 allows the mineral to precipitate. Values below 0 prohibit its precipitation.</el-alert>
+    
+    <template #footer v-if="store.unitPreferences.mineralogyUnit === 'w/w'">
+      <el-alert
+        :title="alertInfo.title"
+        :type="alertInfo.type as 'error' | 'success' | 'warning' | 'info'"
+        center
+        show-icon
+        :closable="false"
+        class="sum-alert"
+      />
+    </template>
   </el-card>
 </template>
 
 <script setup lang="ts">
 // Vue imports
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, onMounted } from 'vue';
 import { store } from '../store';
 import { formationMineralogyConversion } from '../units';
 import { Plus } from '@element-plus/icons-vue';
@@ -102,6 +113,23 @@ const presetOptions = Object.keys(presets);
 
 // Keep track of the previous unit to handle conversions
 const previousUnit = ref(store.unitPreferences.mineralogyUnit);
+
+// Weight fraction sum logic (only when unit is w/w)
+const sumWeightFractions = computed(() => {
+  if (store.unitPreferences.mineralogyUnit !== 'w/w') return 0;
+  return minerals.reduce((sum, mineral) => sum + store.simulationInput.minerals[mineral], 0);
+});
+
+const calculateSum = () => { void sumWeightFractions.value };
+onMounted(calculateSum);
+
+const alertInfo = computed(() => {
+  const sum = sumWeightFractions.value;
+  const title = `Weight fractions sum: ${sum.toFixed(2)}`;
+  return Math.abs(sum - 1) < 1e-6
+    ? { type: 'success', title }
+    : { type: 'error', title: title + ' (should be 1)' };
+});
 
 // Apply selected preset values to store
 const updateMineralogyPreset = (preset: string) => {
@@ -163,5 +191,9 @@ watch(() => store.unitPreferences.mineralogyUnit, (newUnit, oldUnit) => {
 
 .el-select-dropdown__item {
   font-family: 'Roboto' !important;
+}
+
+.sum-alert {
+  margin-top: 10px;
 }
 </style>

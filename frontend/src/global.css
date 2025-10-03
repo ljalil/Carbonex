@@ -1,5 +1,6 @@
 body {
-  margin:0;
+  margin: 0;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 .description {
@@ -27,9 +28,6 @@ body {
   margin-right: 10px !important;
 }
 
-.el-select {
-
-}
 .el-card__header{
   padding: 5px 20px;
 }
@@ -92,7 +90,7 @@ align-items: center;
 border-radius: 5px;
 border: 1px solid #ebeef5;
 color: darkgray;
-margin: 10px 0;
+margin: 0;
 }
 
 .el-alert {

@@ -27,7 +27,7 @@
   
   <script setup lang="ts" >
   import { CaretRight } from "@element-plus/icons-vue";
-  import { runSimulation, runSimulationWithVaryingPressure, runSimulationWithVaryingTemperature, runStaticSimulation, runBrineRockSimulation, runMineralizationWithVaryingPressure, runMineralizationWithVaryingTemperature } from "../actions"; // Added import for heatmap function
+  import { runSimulationCO2BrineSolutionProperties, runSimulationCO2BrineVarP, runSimulationCO2BrineVarT, runSimulationCO2BrineFixed, runSimulationCO2BrineRockFixed, runSimulationCO2BrineRockVarP, runSimulationCO2BrineRockVarT, runSimulationCO2BrineRockSolutionProperties } from "../actions"; // Added import for heatmap function
   import { ref, defineEmits } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import UnitsSettings from "./UnitsSettings.vue";
@@ -39,13 +39,14 @@ import UnitsSettings from "./UnitsSettings.vue";
   const dialogVisible = ref(false)
   
   const handleRunSimulationClicked = () => {
-    runStaticSimulation()
-    runSimulation()
-    runSimulationWithVaryingPressure()
-    runSimulationWithVaryingTemperature()
-    runBrineRockSimulation()
-    runMineralizationWithVaryingPressure()
-    runMineralizationWithVaryingTemperature()
+    runSimulationCO2BrineFixed()
+    runSimulationCO2BrineSolutionProperties()
+    runSimulationCO2BrineVarP()
+    runSimulationCO2BrineVarT()
+    runSimulationCO2BrineRockFixed()
+    runSimulationCO2BrineRockSolutionProperties()
+    runSimulationCO2BrineRockVarP()
+    runSimulationCO2BrineRockVarT()
     emit('run-simulation-clicked')
   }
 
@@ -61,6 +62,8 @@ import UnitsSettings from "./UnitsSettings.vue";
     display: flex;
     align-items: center;
     gap: 5px;
+    flex-shrink: 0; /* Prevent the action bar from shrinking */
+    height: auto; /* Let it size naturally but don't grow */
   }
 
  .el-button, .el-button--primary {

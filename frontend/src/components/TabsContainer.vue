@@ -62,19 +62,23 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0; /* Important for flex children */
+  height: 100%; /* Take full available height */
   margin-top: 15px; /* Space between ActionBar and tabs */
-  margin-bottom: 20px; /* Space at bottom so it doesn't touch window edge */
+  margin-bottom: 0; /* Remove bottom margin to use full space */
+  overflow: hidden; /* Prevent this container from creating scroll */
 }
 
 .tabs-container :deep(.el-tabs__content) {
   flex: 1;
   height: 100%;
+  overflow: hidden; /* Prevent tab content from creating scroll */
 }
 
 .tab-pane {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Ensure individual tab panes don't overflow */
 }
 
 /* Make sure the plot component fills the tab */

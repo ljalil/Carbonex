@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <el-row :gutter="20" style="height: 100%">
-      <el-col :span="14" class="plots-column">
+      <el-col :span="12" class="plots-column">
         <!-- Variable pressure plot -->
         <div class="plot-wrapper">
           <Plot
@@ -25,33 +25,52 @@
         </div>
       </el-col>
 
-      <el-col :span="10">
-        <!-- Dissolved CO2 card -->
-         <SingleValueCard 
-           title="Dissolved and mineralized CO<sub>2</sub>"
-           :value="store.simulationOutput.mineralTrapping.dissolved_co2"
-           unit="mol/kg"
-         />
-         
-         <!-- Solution properties -->
-         <SolutionProperties :data="simulationOutput.mineralTrapping" />
-         
-         <!-- Mineral equilibrium chart -->
-         <el-card shadow="never">
-              <template #header>
-      <div class="card-header">
-        <span>Mineral equilibrium changes</span>
-      </div>
-    </template>
-        <div class="activity-chart-container">
-          <BarPlot
-            :data="activityData"
-            x-axis-label="Minerals"
-            y-axis-label="Equilibrium change (mol)"
-          />
-        </div>
-</el-card>
+      <el-col :span="12" class="scrollable-column">
+        <el-scrollbar height="100%">
+          <div class="scrollable-content">
+            <!-- Dissolved CO2 card -->
+             <SingleValueCard 
+               title="Dissolved and mineralized CO<sub>2</sub>"
+               :value="store.simulationOutput.mineralTrapping.dissolved_co2"
+               unit="mol/kg"
+             />
+             
+             <!-- Solution properties -->
+             <SolutionProperties :data="simulationOutput.mineralTrapping" />
+             
+             <!-- Activity coefficients chart -->
+             <el-card shadow="never">
+                  <template #header>
+          <div class="card-header">
+            <span>Activity coefficients</span>
+          </div>
+        </template>
+            <div class="activity-chart-container">
+              <BarPlot
+                :data="activityCoefficientsData"
+                x-axis-label="Species"
+                y-axis-label="Activity coefficient"
+              />
+            </div>
+    </el-card>
 
+             <!-- Mineral equilibrium chart -->
+             <el-card shadow="never">
+                  <template #header>
+          <div class="card-header">
+            <span>Minerals equilibrium</span>
+          </div>
+        </template>
+            <div class="activity-chart-container">
+              <BarPlot
+                :data="mineralsEquiData"
+                x-axis-label="Minerals"
+                y-axis-label="Amount (moles)"
+              />
+            </div>
+    </el-card>
+          </div>
+        </el-scrollbar>
       </el-col>
     </el-row>
   </div>
@@ -84,7 +103,14 @@ const ionNameMapping: Record<string, string> = {
 
 const formatIonName = (ion: string) => ionNameMapping[ion] || ion;
 
-const activityData = computed(() => {
+const activityCoefficientsData = computed(() =>
+  (simulationOutput.value.mineralTrapping.speciesData || []).map((item: any) => ({
+    label: item.species,
+    value: item.activity
+  }))
+);
+
+const mineralsEquiData = computed(() => {
   const mineralEqui = simulationOutput.value.mineralTrapping.mineral_equi || {};
   const initialMinerals = simulationOutput.value.mineralTrapping.initial_minerals || {}; // Use stored snapshot instead of current user input
   
@@ -153,5 +179,17 @@ const activityData = computed(() => {
 
 .plot-wrapper:last-child {
   margin-bottom: 0;
+}
+
+.scrollable-column {
+  height: 100%;
+}
+
+.scrollable-column .el-scrollbar {
+  height: 100%;
+}
+
+.scrollable-content {
+  padding-right: 15px;
 }
 </style>

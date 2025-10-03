@@ -8,7 +8,7 @@
     <OperationalSettings />
   <WaterChemistry />
   <FormationMineralogy />
-  <StreamImpurities />
+  <!-- <StreamImpurities /> -->
   </div>
 </template>
 

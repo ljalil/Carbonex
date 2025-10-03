@@ -76,6 +76,7 @@ export interface MineralTrapping {
   osmotic_coefficient: number;
   fugacity_co2: number;
   partial_pressure_co2: number;
+  speciesData: SpeciesData[];
   mineral_equi: Record<string, number>; // Dictionary of mineral deltas
   initial_minerals: Record<string, number>; // Snapshot of initial mineral amounts from when simulation was run
   plotDataPressure: [number, number][]; // Array of [pressure, dissolved_co2] pairs
@@ -200,6 +201,16 @@ export const store = reactive<{
       osmotic_coefficient: 0,
       fugacity_co2: 0,
       partial_pressure_co2: 0,
+      speciesData: [
+        { species: "Na+", activity: 0, molar_volume: 0 },
+        { species: "Cl-", activity: 0, molar_volume: 0 },
+        { species: "K+", activity: 0, molar_volume: 0 },
+        { species: "Mg+2", activity: 0, molar_volume: 0 },
+        { species: "Ca+2", activity: 0, molar_volume: 0 },
+        { species: "SO4-2", activity: 0, molar_volume: 0 },
+        { species: "HCO3-", activity: 0, molar_volume: 0 },
+        { species: "CO3-2", activity: 0, molar_volume: 0 },
+      ],
       mineral_equi: {},
       initial_minerals: {},
       plotDataPressure: [],

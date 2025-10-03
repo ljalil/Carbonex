@@ -1,79 +1,71 @@
 <template>
   <div class="tab-content">
     <el-row :gutter="20" style="height: 100%">
-      <el-col :span="14" class="plots-column">
+      <el-col :span="12" class="plots-column">
         <!-- Solution properties card -->
-        
+
 
         <!-- Solubility plot -->
         <div class="plot-wrapper">
-          <Plot
-            :data="simulationOutput.solubilityTrapping.plotDataPressure"
+          <Plot :data="simulationOutput.solubilityTrapping.plotDataPressure"
             :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
-            x-axis-label="Pressure (MPa)"
-            y-axis-label="Dissolved CO2 (mol/kg)"
-            :tooltip-labels="['Pressure', 'Dissolved CO2']"
-          />
+            x-axis-label="Pressure (MPa)" y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Pressure', 'Dissolved CO2']" />
         </div>
 
         <div class="plot-wrapper">
-          <Plot 
-            :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
+          <Plot :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
             :emphasis="[store.simulationInput.temperature, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
-            x-axis-label="Temperature (K)"
-            y-axis-label="Dissolved CO2 (mol/kg)"
-            :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
-          />
+            x-axis-label="Temperature (K)" y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']" />
         </div>
       </el-col>
 
-      <el-col :span="10">
-        <!-- Activities plot -->
-         <SingleValueCard 
-           title="Dissolved CO<sub>2</sub>"
-           :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2"
-           unit="mol/kg"
-         />
-         <SolutionProperties :data="simulationOutput.solubilityTrapping" />
-         <el-card  shadow="never">
+      <el-col :span="12" class="scrollable-column">
+        <el-scrollbar height="100%">
+          <div class="scrollable-content">
+            <!-- Activities plot -->
+            <SingleValueCard title="Dissolved CO<sub>2</sub>"
+              :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2" unit="mol/kg" />
+            <SolutionProperties :data="simulationOutput.solubilityTrapping" />
+            <el-card shadow="never">
               <template #header>
-      <div class="card-header">
-        <span>Activity coefficients</span>
-      </div>
-    </template>
-        <div class="activity-chart-container">
-          <BarPlot
-            :data="activityData"
-            x-axis-label="Species"
-            y-axis-label="Activity coefficient"
-          />
-        </div>
-</el-card>
+                <div class="card-header">
+                  <span>Activity coefficients</span>
+                </div>
+              </template>
+              <div class="activity-chart-container">
+                <BarPlot :data="activityData" x-axis-label="Species" y-axis-label="Activity coefficient" />
+              </div>
+            </el-card>
 
-        <!-- Molar volumes table -->
-        <!-- <el-table
-          :data="simulationOutput.speciesData"
-          border
-          stripe
-          style="width: 100%; margin-top: 16px;"
-        >
-          <el-table-column
-            prop="species"
-            label="Species"
-            width="80"
-          >
-            <template #default="scope">
-              <span v-html="formatIonName(scope.row.species)"></span>
-            </template>
-          </el-table-column>
 
-          <el-table-column
-            prop="molar_volume"
-            label="Molar volume"
-            align="center"
-          />
-        </el-table> -->
 
+            <!-- Molar volumes table -->
+            <!-- <el-table
+              :data="simulationOutput.speciesData"
+              border
+              stripe
+              style="width: 100%; margin-top: 16px;"
+            >
+              <el-table-column
+                prop="species"
+                label="Species"
+                width="80"
+              >
+                <template #default="scope">
+                  <span v-html="formatIonName(scope.row.species)"></span>
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                prop="molar_volume"
+                label="Molar volume"
+                align="center"
+              />
+            </el-table> -->
+          </div>
+        </el-scrollbar>
       </el-col>
     </el-row>
   </div>
@@ -132,5 +124,17 @@ const activityData = computed(() =>
 
 .plot-wrapper:last-child {
   margin-bottom: 0;
+}
+
+.scrollable-column {
+  height: 100%;
+}
+
+.scrollable-column .el-scrollbar {
+  height: 100%;
+}
+
+.scrollable-content {
+  padding-right: 15px;
 }
 </style>

@@ -11,6 +11,7 @@ mineralogy = mineralogy.replace("Tr", 0)
 mineralogy = mineralogy[
     [
         "API Number",
+        "Depth",
         "Quartz",
         "Calcite/Aragonite",
         "Dolomite",
@@ -32,40 +33,45 @@ mineralogy = mineralogy.rename(
     }
 )
 
-# Convert all mineral columns to numeric (excluding API Number)
-mineral_columns = [col for col in mineralogy.columns if col != 'API Number']
+# Convert all mineral columns to numeric (excluding API Number and Depth)
+mineral_columns = [col for col in mineralogy.columns if col not in ['API Number', 'Depth']]
 for col in mineral_columns:
     mineralogy[col] = pd.to_numeric(mineralogy[col], errors='coerce')
 
 # Fill NaN values with 0
 mineralogy = mineralogy.fillna(0)
 
-# Remove rows where API Number is NaN or empty
-mineralogy = mineralogy.dropna(subset=['API Number'])
+# Remove rows where API Number or Depth is NaN or empty
+mineralogy = mineralogy.dropna(subset=['API Number', 'Depth'])
 mineralogy = mineralogy[mineralogy['API Number'] != '']
+mineralogy = mineralogy[mineralogy['Depth'] != '']
+
+# Create composite identifier with API Number and Depth
+mineralogy['Composite_ID'] = mineralogy['API Number'].astype(str) + ' (' + mineralogy['Depth'].astype(str) + 'ft)'
 
 print("Column names after processing:")
 print(mineralogy.columns.tolist())
 print(f"\nNumber of samples: {len(mineralogy)}")
+print(f"Number of unique composite IDs: {mineralogy['Composite_ID'].nunique()}")
 
 # Create the presets dictionary
 presets = {}
 
 # Iterate through each row and create a preset
 for index, row in mineralogy.iterrows():
-    api_number = str(row['API Number']).strip()
+    composite_id = row['Composite_ID']
     
-    # Skip if API Number is empty
-    if not api_number or api_number == 'nan':
+    # Skip if Composite ID is empty
+    if not composite_id or composite_id == 'nan':
         continue
     
-    # Create preset for this API Number
+    # Create preset for this composite ID
     preset = {}
     mineral_values = []
     
-    # First pass: collect all mineral values
+    # First pass: collect all mineral values (excluding API Number, Depth, and Composite_ID)
     for column in mineralogy.columns:
-        if column != 'API Number':
+        if column not in ['API Number', 'Depth', 'Composite_ID']:
             # Convert to float and ensure it's between 0 and 1 (assuming percentages)
             value = float(row[column])
             # If values are in percentages (>1), convert to fractions
@@ -93,7 +99,7 @@ for index, row in mineralogy.iterrows():
         for column, value in mineral_values:
             preset[column] = round(value, 4)
     
-    presets[api_number] = preset
+    presets[composite_id] = preset
 
 print(f"\nGenerated {len(presets)} presets")
 

@@ -52,8 +52,7 @@ export default defineComponent({
     },
     yAxisLabel: {
       type: String,
-      show: false,
-      
+      default: 'Value'
     },
 
   },
@@ -87,7 +86,7 @@ export default defineComponent({
             data: multiData.series.map(s => s.name)
           },
           grid: {
-            left: '5%',
+            left: '10%',
             right: '5%',
             bottom: '15%',
             top: '15%',
@@ -110,7 +109,10 @@ export default defineComponent({
             type: 'value',
             name: props.yAxisLabel,
             nameLocation: 'center',
-            nameGap: 50
+            nameGap: 35,
+            nameTextStyle: {
+              fontSize: 12
+            }
           },
           series: multiData.series.map((seriesItem, index) => ({
             name: seriesItem.name,
@@ -163,7 +165,10 @@ export default defineComponent({
             type: 'value',
             name: props.yAxisLabel,
             nameLocation: 'center',
-            nameGap: 30
+            nameGap: 35,
+            nameTextStyle: {
+              fontSize: 12
+            }
           },
           series: [
             {

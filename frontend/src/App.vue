@@ -54,6 +54,7 @@ const simulationOutput = computed(() => store.simulationOutput)
   flex: 1;
   height: calc(100vh - 60px); /* Adjust based on header height */
   margin: 0 !important;
+  overflow: hidden; /* Prevent main content from scrolling */
 }
 
 .center-column {
@@ -61,9 +62,10 @@ const simulationOutput = computed(() => store.simulationOutput)
 }
 
 .center-content {
-  height: 100%;
+  height: calc(100vh - 60px); /* Subtract header height */
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent scrolling of the main container */
 }
 
 .sidebar-container {
