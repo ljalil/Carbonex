@@ -1,13 +1,13 @@
 <template>
   <SingleValueCard 
     title="Dissolved CO<sub>2</sub>"
-    :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2"
+    :value="store.simulationOutput.solubilityTrapping.trapped_co2"
     unit="mol/kg"
   />
 
   <SingleValueCard 
     title="Dissolved and mineralized CO<sub>2</sub>"
-    :value="store.simulationOutput.mineralTrapping.dissolved_co2"
+    :value="store.simulationOutput.mineralTrapping.trapped_co2"
     unit="mol/kg"
   />
   <!-- <OperationalRisk /> -->

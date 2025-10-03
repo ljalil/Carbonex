@@ -3,6 +3,10 @@
     <template #header>
       <div class="card-header">
         <span>AI Insights</span>
+        <span>
+          <el-button size="small" :icon="CopyDocument" circle @click="handleCopyInsights" :disabled="!hasInsights" />
+        <el-button size="small" :icon="Refresh" circle @click="handleRefreshInsights" />
+        </span>
       </div>
     </template>
 
@@ -20,11 +24,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { store } from '../store'
+import { CopyDocument, Refresh } from '@element-plus/icons-vue'
+import { requestAIInsights } from '../actions'
 
 const hasInsights = computed(() => 
   store.simulationOutput.aiInsights && 
   store.simulationOutput.aiInsights.trim().length > 0
 )
+
+const handleRefreshInsights = async () => {
+  await requestAIInsights()
+}
+
+const handleCopyInsights = async () => {
+  if (hasInsights.value && store.simulationOutput.aiInsights) {
+    try {
+      await navigator.clipboard.writeText(store.simulationOutput.aiInsights)
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error)
+    }
+  }
+}
 </script>
 
 <style scoped>

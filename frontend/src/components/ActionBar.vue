@@ -27,10 +27,11 @@
   
   <script setup lang="ts" >
   import { CaretRight } from "@element-plus/icons-vue";
-  import { runSimulationCO2BrineSolutionProperties, runSimulationCO2BrineVarP, runSimulationCO2BrineVarT, runSimulationCO2BrineFixed, runSimulationCO2BrineRockFixed, runSimulationCO2BrineRockVarP, runSimulationCO2BrineRockVarT, runSimulationCO2BrineRockSolutionProperties } from "../actions"; // Added import for heatmap function
+  import { runSimulationCO2BrineSolutionProperties, runSimulationCO2BrineVarP, runSimulationCO2BrineVarT, runSimulationCO2BrineFixed, runSimulationCO2BrineRockFixed, runSimulationCO2BrineRockVarP, runSimulationCO2BrineRockVarT, runSimulationCO2BrineRockSolutionProperties} from "../actions";
   import { ref, defineEmits } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import UnitsSettings from "./UnitsSettings.vue";
+import { store } from '../store'
 
   const emit = defineEmits<{
     (e: 'run-simulation-clicked'): void
@@ -38,7 +39,10 @@ import UnitsSettings from "./UnitsSettings.vue";
   
   const dialogVisible = ref(false)
   
-  const handleRunSimulationClicked = () => {
+    const handleRunSimulationClicked = () => {
+    // Reset AI insights when starting new simulation
+    store.simulationOutput.aiInsights = ''
+    
     runSimulationCO2BrineFixed()
     runSimulationCO2BrineSolutionProperties()
     runSimulationCO2BrineVarP()

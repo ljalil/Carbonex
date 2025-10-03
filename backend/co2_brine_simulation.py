@@ -188,10 +188,10 @@ def _simulate_varying_pressure_PHREEQC(temperature, ion_moles, database):
             # Convert pressure from atm to MPa
             pressure = float(row.get("pressure", 0)) * 0.101325
             pressure = round(pressure, 2)
-            dissolved_co2 = float(row.get("C(4)", 2))
+            trapped_co2 = float(row.get("C(4)", 2))
 
             result["Pressure (MPa)"].append(pressure)
-            result["Dissolved CO2 (mol/kg)"].append(dissolved_co2)
+            result["Dissolved CO2 (mol/kg)"].append(trapped_co2)
 
     if os.path.exists("error.inp"):
         os.remove("error.inp")
@@ -243,11 +243,11 @@ def _simulate_varying_temperature_PHREEQC(pressure, ion_moles, database):
 
     for temperature in temperatures:
         try:
-            dissolved_co2 = _run_PHREEQC_state_simulation(
+            trapped_co2 = _run_PHREEQC_state_simulation(
                 temperature, pressure, ion_moles, database
             )
             result["Temperature (K)"].append(temperature)
-            result["Dissolved CO2 (mol/kg)"].append(dissolved_co2)
+            result["Dissolved CO2 (mol/kg)"].append(trapped_co2)
         except Exception as e:
             print(f"Error at temperature {temperature}: {e}", flush=True)
             continue
@@ -415,11 +415,11 @@ def _run_PHREEQC_state_simulation(temperature, pressure, species, database):
 
     # Extract the C(4) value (dissolved CO2)
     try:
-        dissolved_co2 = float(results.get("C(4)", 0))
+        trapped_co2 = float(results.get("C(4)", 0))
     except (ValueError, TypeError):
-        dissolved_co2 = 0
+        trapped_co2 = 0
 
-    return dissolved_co2
+    return trapped_co2
 
 
 def _run_Duan_Sun_state_simulation(temperature, pressure, species):
@@ -427,36 +427,36 @@ def _run_Duan_Sun_state_simulation(temperature, pressure, species):
     model = DuanSun2006.DuanSun2006()
     try:
         # calculate_CO2_solubility expects P in MPa, T in Kelvin, ion molalities dict
-        dissolved_co2 = model.calculate_CO2_solubility(
+        trapped_co2 = model.calculate_CO2_solubility(
             pressure, temperature, species, model="DuanSun"
         )
     except Exception:
-        dissolved_co2 = 0
-    return dissolved_co2
+        trapped_co2 = 0
+    return trapped_co2
 
 
 def simulate_co2_brine_fixed(temperature, pressure, species, model):
     """
     Run simulation for fixed conditions and return only dissolved CO2.
     """
-    dissolved_co2 = 0  # Default value
+    trapped_co2 = 0  # Default value
     
     if model == "phreeqc_phreeqc":
-        dissolved_co2 = _run_PHREEQC_state_simulation(
+        trapped_co2 = _run_PHREEQC_state_simulation(
             temperature, pressure, species, database="phreeqc"
         )
     elif model == "phreeqc_pitzer":
-        dissolved_co2 = _run_PHREEQC_state_simulation(
+        trapped_co2 = _run_PHREEQC_state_simulation(
             temperature, pressure, species, database="pitzer"
         )
     elif model == "duan_sun_2006":
-        dissolved_co2 = _run_Duan_Sun_state_simulation(temperature, pressure, species)
+        trapped_co2 = _run_Duan_Sun_state_simulation(temperature, pressure, species)
     elif model == "carbonex":
-        dissolved_co2 = 3
+        trapped_co2 = 3
     else:
         # Default to phreeqc if model is not recognized
-        dissolved_co2 = _run_PHREEQC_state_simulation(
+        trapped_co2 = _run_PHREEQC_state_simulation(
             temperature, pressure, species, database="phreeqc"
         )
 
-    return dissolved_co2
+    return trapped_co2

@@ -8,14 +8,14 @@
         <!-- Solubility plot -->
         <div class="plot-wrapper">
           <Plot :data="simulationOutput.solubilityTrapping.plotDataPressure"
-            :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
+            :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.trapped_co2]"
             x-axis-label="Pressure (MPa)" y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Pressure', 'Dissolved CO2']" />
         </div>
 
         <div class="plot-wrapper">
           <Plot :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
-            :emphasis="[store.simulationInput.temperature, store.simulationOutput.solubilityTrapping.total_dissolved_co2]"
+            :emphasis="[store.simulationInput.temperature, store.simulationOutput.solubilityTrapping.trapped_co2]"
             x-axis-label="Temperature (K)" y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']" />
         </div>
@@ -26,7 +26,7 @@
           <div class="scrollable-content">
             <!-- Activities plot -->
             <SingleValueCard title="Dissolved CO<sub>2</sub>"
-              :value="store.simulationOutput.solubilityTrapping.total_dissolved_co2" unit="mol/kg" />
+              :value="store.simulationOutput.solubilityTrapping.trapped_co2" unit="mol/kg" />
             <SolutionProperties :data="simulationOutput.solubilityTrapping" />
             <el-card shadow="never">
               <template #header>
@@ -112,6 +112,7 @@ const activityData = computed(() =>
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding-bottom: 10px;
 }
 
 .plot-wrapper {

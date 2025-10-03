@@ -15,7 +15,7 @@ from co2_brine_rock_simulation import (
     simulate_co2_brine_rock_var_t,
 )
 
-
+import requests
 import numpy as np
 
 app = Flask(__name__)
@@ -154,7 +154,7 @@ def simulate_co2_brine_fixed_endpoint():
         concentrations = data.get("concentrations")
         model = data.get("model")
 
-        dissolved_co2 = simulate_co2_brine_fixed(
+        trapped_co2 = simulate_co2_brine_fixed(
             temperature=temperature,
             pressure=pressure,
             species=concentrations,
@@ -163,7 +163,7 @@ def simulate_co2_brine_fixed_endpoint():
 
 
         response_data = {
-            "total_dissolved_co2": dissolved_co2,
+            "trapped_co2": trapped_co2,
         }
 
         return jsonify(
@@ -249,7 +249,7 @@ def simulate_co2_rock_brine_single_state_endpoint():
         )
 
         response_data = {
-            "dissolved_co2": results["dissolved_co2"],
+            "trapped_co2": results["trapped_co2"],
             "mineral_equi": results["mineral_equi"],
         }
 
@@ -344,8 +344,146 @@ def simulate_co2_brine_rock_var_t_endpoint():
 
 
 @app.route("/utilities/AI-insights", methods=["POST"])
-def get_AI_insights(pressure, temperature, concentrations):
-    prompt = f"I conducted a simulation for CO2 solubility and mineralization under a certain pressure and temperature conditions. I will give you the results and you give me a brief description of main findings and your remarks on this simulation results. This is intended to be embedded in a UI for the user as an AI summary, so skip any introductory text and keep it brief and formal. Provide insights into the geochemistry to the end user rather than just providing a commentary on the results. === Pressure and temperature === - Pressure: {pressure} MPa - temperature: {temperature} K === solubility === - Initial brine composition (mol/kgw): -- Na+: 0.4690 -- K+: 0.0102 -- Cl-: 0.5460 -- Mg+2: 0.0528 -- Ca+2: 0.0103 -- SO4-2: 0.0282 - Solution density: 1.0346 g/cm - Ionic strength: 0.6927 mol/kgw - pH: 3.1205 - Activity coefficients: -- Na+: 0.6717 -- Cl-: 0.6269 -- K+: 0.1189 -- Mg+2: 0.1820 -- Ca+2: 0.0864 -- SO4-2: 0.0789 -- HCO3-:0.0448 -- CO3-2: 0 - Dissolved CO2 due to solubility only: 1.1640 mol/kgw === solubility + mineralization === - Solution density: 1.0539 g/cm - Ionic strength: 0.8929 mol/kgw - pH: 5.4812 - Formation mineralogy change (moles): -- Quartz: 0.25 -> 0.9099 -- Albite: 0.1 -> 0 -- K-feldspar: 0.05 -> 0 -- Illite: 0.3 -> 0 -- Kaolinite: 0.1 -> 0.52 -- Calcite: 0.05 -> 0 -- Dolomite: 0.05 -> 0.10952 - Dissolved CO2 due to solubility and mineralization: 1.5133 mol/kgw"
+def get_AI_insights():
+    try:
+        data = request.json
+        
+        # Extract data from payload
+        pressure = data.get("pressure", 0)
+        temperature = data.get("temperature", 0)
+        solubility_trapping = data.get("solubilityTrapping", {})
+        mineral_trapping = data.get("mineralTrapping", {})
+        
+        # Extract solubility trapping data
+        sol_trapped_co2 = solubility_trapping.get("trapped_co2", 0)
+        sol_density = solubility_trapping.get("density", 0)
+        sol_ionic_strength = solubility_trapping.get("ionic_strength", 0)
+        sol_pH = solubility_trapping.get("pH", 0)
+        sol_species_activities = solubility_trapping.get("speciesActivities", {})
+        
+        # Extract mineral trapping data
+        min_trapped_co2 = mineral_trapping.get("trapped_co2", 0)
+        min_density = mineral_trapping.get("density", 0)
+        min_ionic_strength = mineral_trapping.get("ionic_strength", 0)
+        min_pH = mineral_trapping.get("pH", 0)
+        min_species_activities = mineral_trapping.get("speciesActivities", {})
+        initial_minerals = mineral_trapping.get("initial_minerals", {})
+        final_minerals = mineral_trapping.get("mineral_equi", {})
+        
+        # Format species activities for prompt
+        def format_activities(activities):
+            return "\n".join([f"-- {species}: {activity:.4f}" for species, activity in activities.items()])
+        
+        # Format mineral changes for prompt
+        def format_mineral_changes(initial, final):
+            changes = []
+            all_minerals = set(initial.keys()) | set(final.keys())
+            for mineral in all_minerals:
+                init_val = initial.get(mineral, 0)
+                final_val = final.get(mineral, 0)
+                changes.append(f"-- {mineral}: {init_val:.4f} -> {final_val:.4f}")
+            return "\n".join(changes)
+        
+        # Convert temperature from Kelvin to Celsius for more intuitive analysis
+        temp_celsius = temperature - 273.15
+        
+        prompt = f"""I conducted a simulation for CO2 solubility and mineralization under specific pressure and temperature conditions. I will give you the results and you give me a brief description of main findings and your remarks on this simulation results. This is intended to be embedded in a UI for the user as an AI summary, so skip any introductory text and keep it brief and formal. Provide insights into the geochemistry to the end user rather than just providing a commentary on the results.
+
+IMPORTANT: If the provided data contains unrealistic values (such as no dissolved CO2, pH=0, negative densities, or other physically impossible values), simply return a short sentence stating that the simulation data appears to contain invalid or unrealistic values that should be verified.
+
+=== Pressure and Temperature ===
+- Pressure: {pressure:.2f} MPa ({pressure * 10:.1f} bar)
+- Temperature: {temperature:.2f} K ({temp_celsius:.1f}°C)
+
+=== Solubility Trapping Only ===
+- Solution density: {sol_density:.4f} g/cm³
+- Ionic strength: {sol_ionic_strength:.4f} mol/kgw
+- pH: {sol_pH:.2f}
+- Dissolved CO2 due to solubility only: {sol_trapped_co2:.4f} mol/kgw
+- Species activities:
+{format_activities(sol_species_activities)}
+
+=== Solubility + Mineral Trapping ===
+- Solution density: {min_density:.4f} g/cm³
+- Ionic strength: {min_ionic_strength:.4f} mol/kgw
+- pH: {min_pH:.2f}
+- Dissolved CO2 due to solubility and mineralization: {min_trapped_co2:.4f} mol/kgw
+- Species activities:
+{format_activities(min_species_activities)}
+- Formation mineralogy changes (moles):
+{format_mineral_changes(initial_minerals, final_minerals)}
+
+=== Additional Analysis Points ===
+- CO2 enhancement due to mineralization: {(min_trapped_co2 - sol_trapped_co2):.4f} mol/kgw ({((min_trapped_co2 - sol_trapped_co2) / sol_trapped_co2 * 100) if sol_trapped_co2 > 0 else 0:.1f}% increase)
+- pH change due to mineralization: {(min_pH - sol_pH):.2f} units
+- Density change: {(min_density - sol_density):.4f} g/cm³
+- Ionic strength change: {(min_ionic_strength - sol_ionic_strength):.4f} mol/kgw"""
+
+        # For now, return the prompt as the insight (placeholder for actual AI integration)
+        # In a real implementation, you would send this prompt to an AI service
+
+        print(prompt, flush=True)
+        
+        # Call Google Gemini API
+        try:
+            gemini_api_key = "AIzaSyD3VruK6S0PlADDWdbc_xXuw9QhkBD71tM"
+            gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+            
+            headers = {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': gemini_api_key
+            }
+            
+            gemini_payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            # Make request to Gemini API
+            gemini_response = requests.post(gemini_url, headers=headers, json=gemini_payload, timeout=30)
+            
+            if gemini_response.status_code == 200:
+                gemini_data = gemini_response.json()
+                
+                # Extract the AI-generated text from the response
+                if (gemini_data.get("candidates") and 
+                    len(gemini_data["candidates"]) > 0 and
+                    gemini_data["candidates"][0].get("content") and
+                    gemini_data["candidates"][0]["content"].get("parts") and
+                    len(gemini_data["candidates"][0]["content"]["parts"]) > 0):
+                    
+                    ai_insights = gemini_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                else:
+                    ai_insights = "Unable to generate AI insights - invalid response format."
+            else:
+                print(f"Gemini API error: {gemini_response.status_code} - {gemini_response.text}")
+                ai_insights = f"Simulation Analysis at {pressure:.1f} MPa and {temp_celsius:.0f}°C: The CO2 solubility shows {sol_trapped_co2:.2f} mol/kgw under brine-only conditions with pH {sol_pH:.1f}. Mineral-brine interactions increase CO2 storage to {min_trapped_co2:.2f} mol/kgw (+{((min_trapped_co2 - sol_trapped_co2) / sol_trapped_co2 * 100) if sol_trapped_co2 > 0 else 0:.1f}%) while buffering pH to {min_pH:.1f}. Key geochemical processes include mineral dissolution/precipitation affecting solution chemistry and CO2 speciation."
+                
+        except requests.exceptions.RequestException as e:
+            print(f"Error calling Gemini API: {e}")
+            # Fallback response
+            ai_insights = f"Simulation Analysis at {pressure:.1f} MPa and {temp_celsius:.0f}°C: The CO2 solubility shows {sol_trapped_co2:.2f} mol/kgw under brine-only conditions with pH {sol_pH:.1f}. Mineral-brine interactions increase CO2 storage to {min_trapped_co2:.2f} mol/kgw (+{((min_trapped_co2 - sol_trapped_co2) / sol_trapped_co2 * 100) if sol_trapped_co2 > 0 else 0:.1f}%) while buffering pH to {min_pH:.1f}. Key geochemical processes include mineral dissolution/precipitation affecting solution chemistry and CO2 speciation."
+        
+        response_data = {
+            "insights": ai_insights
+        }
+        
+        return jsonify({
+            "status": "success",
+            "message": "AI insights generated successfully",
+            "data": response_data
+        })
+        
+    except Exception as e:
+        print(f"Error generating AI insights: {e}")
+        return jsonify({"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":

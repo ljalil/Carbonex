@@ -285,10 +285,10 @@ def _run_PHREEQC_brine_rock_varying_pressure(
                     pressure_mpa = pressure * 0.101325 if pressure > 1.0 else pressure
                     pressure_mpa = round(pressure_mpa, 2)
 
-                    dissolved_co2 = float(row.get("C(4)", 0))
+                    trapped_co2 = float(row.get("C(4)", 0))
 
                     result["Pressure (MPa)"].append(pressure_mpa)
-                    result["Dissolved CO2 (mol/kg)"].append(dissolved_co2)
+                    result["Dissolved CO2 (mol/kg)"].append(trapped_co2)
 
             except (ValueError, KeyError) as e:
                 # Skip rows with invalid data
@@ -427,7 +427,7 @@ def simulate_co2_brine_rock_fixed(
 
     # Extract results
     try:
-        dissolved_co2 = float(results.get("C(4)", 0))
+        trapped_co2 = float(results.get("C(4)", 0))
         density = float(results.get("SOL_DENSITY", 0))
         ionic_strength = float(results.get("mu", 0))
         pH = float(results.get("pH", 7.0))
@@ -446,7 +446,7 @@ def simulate_co2_brine_rock_fixed(
 
     except (ValueError, TypeError) as e:
         print(f"Error parsing results: {e}", flush=True)
-        dissolved_co2 = 0
+        trapped_co2 = 0
         density = 0
         ionic_strength = 0
         pH = 7.0
@@ -456,7 +456,7 @@ def simulate_co2_brine_rock_fixed(
         mineral_equi = {k: 0 for k in mineral_names.keys()}
 
     return {
-        "dissolved_co2": dissolved_co2,
+        "trapped_co2": trapped_co2,
         "mineral_equi": mineral_equi,
     }
 
@@ -507,7 +507,7 @@ def simulate_co2_brine_rock_var_t(pressure, ion_moles, mineralogy, model):
         418,
         433,
     ]  # K range (25-160°C)
-    dissolved_co2_values = []
+    trapped_co2_values = []
 
     for temperature in temperatures:
         try:
@@ -518,12 +518,12 @@ def simulate_co2_brine_rock_var_t(pressure, ion_moles, mineralogy, model):
                 mineralogy=mineralogy,
                 model=model,
             )
-            dissolved_co2_values.append(result["dissolved_co2"])
+            trapped_co2_values.append(result["trapped_co2"])
         except Exception as e:
             print(f"Error at temperature {temperature} K: {e}")
-            dissolved_co2_values.append(0)
+            trapped_co2_values.append(0)
 
     return {
         "Temperature (K)": temperatures,
-        "Dissolved CO2 (mol/kg)": dissolved_co2_values,
+        "Dissolved CO2 (mol/kg)": trapped_co2_values,
     }
