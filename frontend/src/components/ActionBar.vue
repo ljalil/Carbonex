@@ -65,13 +65,13 @@ import { store } from '../store'
   .action-bar {
     display: flex;
     align-items: center;
-    gap: 5px;
+    /* gap: 5px; */
     flex-shrink: 0; /* Prevent the action bar from shrinking */
     height: auto; /* Let it size naturally but don't grow */
   }
 
  .el-button, .el-button--primary {
   font-family: 'Roboto' !important;
-  margin-left: 0px;
+  margin-left: 5px;
 }
   </style>

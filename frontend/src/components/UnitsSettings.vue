@@ -63,6 +63,9 @@
         </el-select>
       </el-form-item>
     </el-form>
+    <el-alert type="info" :closable="false" style="font-size: medium;">
+      Conversion between mg/L and mol/L &#8660; mol/Kg depends on density estimation from molar volumes approximations, therefore it needs to be used with caution.
+    </el-alert>
 
 </template>
 

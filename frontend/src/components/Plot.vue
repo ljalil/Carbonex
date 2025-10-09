@@ -94,7 +94,7 @@ export default defineComponent({
           data: props.data,
           type: 'line',
           smooth: false,
-          itemStyle: { color: '#409EFF' }
+          itemStyle: { color: 'black' }
         },
         {
           data: [props.emphasis],

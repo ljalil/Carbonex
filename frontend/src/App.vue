@@ -15,7 +15,7 @@
           <TabsContainer></TabsContainer>
         </div>
         </el-main>
-        <el-aside width="20%">
+        <el-aside width="22%">
         <SimulationInfo></SimulationInfo>
         </el-aside>
 

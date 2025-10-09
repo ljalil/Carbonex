@@ -6,15 +6,32 @@
         <div class="plot-wrapper">
           <Plot
             :data="plotDataPressure"
-            :emphasis="[store.simulationInput.pressure, store.simulationOutput.mineralTrapping.trapped_co2]"
             x-axis-label="Pressure (MPa)"
             y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Pressure', 'Dissolved CO2']"
           />
         </div>
 
+        <!-- <div class="plot-wrapper">
+          <Plot
+            :data="plotDataPressure"
+            :emphasis="[store.simulationInput.pressure, store.simulationOutput.mineralTrapping.trapped_co2]"
+            x-axis-label="Pressure (MPa)"
+            y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Pressure', 'Dissolved CO2']"
+          />
+        </div> -->
+
         <!-- Variable temperature plot -->
-        <div class="plot-wrapper">
+         <div class="plot-wrapper">
+          <Plot 
+            :data="plotDataTemperature"
+            x-axis-label="Temperature (K)"
+            y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
+          />
+        </div>
+        <!-- <div class="plot-wrapper">
           <Plot 
             :data="plotDataTemperature"
             :emphasis="[store.simulationInput.temperature, store.simulationOutput.mineralTrapping.trapped_co2]"
@@ -22,7 +39,7 @@
             y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']"
           />
-        </div>
+        </div> -->
       </el-col>
 
       <el-col :span="12" class="scrollable-column">
@@ -167,7 +184,7 @@ const mineralsEquiData = computed(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  
+  padding-bottom: 10px;
 }
 
 .plot-wrapper {

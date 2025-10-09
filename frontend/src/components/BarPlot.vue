@@ -80,6 +80,14 @@ export default defineComponent({
             trigger: 'axis',
             axisPointer: {
               type: 'shadow'
+            },
+            formatter: function(params: any) {
+              let result = '';
+              params.forEach((param: any) => {
+                const value = param.value.toFixed(4);
+                result += `${param.seriesName}: ${value}<br/>`;
+              });
+              return result;
             }
           },
           legend: {
@@ -174,7 +182,7 @@ export default defineComponent({
             {
               type: 'bar',
               data: singleData.map(item => item.value),
-              itemStyle: { color: '#409EFF' }
+              itemStyle: { color: 'black' }
             }
           ],
         };

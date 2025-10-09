@@ -50,7 +50,7 @@
       </template>
     </el-form>
 
-        <el-alert style="margin-top: 10px !important;" :closable="false">Value of 0 allows the mineral to precipitate. Values below 0 prohibit its precipitation.</el-alert>
+        <el-alert style="margin-top: 10px !important; font-size: medium;" :closable="false">Value of 0 allows the mineral to precipitate. Values below 0 prohibit its precipitation.</el-alert>
     
     <template #footer v-if="store.unitPreferences.mineralogyUnit === 'w/w'">
       <el-alert

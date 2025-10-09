@@ -2,7 +2,7 @@
   <el-card class="sidebar-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <span>AI Insights</span>
+        <span>AI Summary</span>
         <span>
           <el-button size="small" :icon="CopyDocument" circle @click="handleCopyInsights" :disabled="!hasInsights" />
         <el-button size="small" :icon="Refresh" circle @click="handleRefreshInsights" />
@@ -15,7 +15,7 @@
         {{ store.simulationOutput.aiInsights }}
       </el-text>
       <el-text v-else size="default" class="insight-text no-insights">
-        No AI insights available. Run a simulation to generate intelligent analysis of your results.
+        No AI summary available. Run a simulation to generate intelligent analysis of your results.
       </el-text>
     </div>
   </el-card>

@@ -8,17 +8,29 @@
         <!-- Solubility plot -->
         <div class="plot-wrapper">
           <Plot :data="simulationOutput.solubilityTrapping.plotDataPressure"
-            :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.trapped_co2]"
             x-axis-label="Pressure (MPa)" y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Pressure', 'Dissolved CO2']" />
         </div>
 
+        <!-- <div class="plot-wrapper">
+          <Plot :data="simulationOutput.solubilityTrapping.plotDataPressure"
+            :emphasis="[store.simulationInput.pressure, store.simulationOutput.solubilityTrapping.trapped_co2]"
+            x-axis-label="Pressure (MPa)" y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Pressure', 'Dissolved CO2']" />
+        </div> -->
+
         <div class="plot-wrapper">
+          <Plot :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
+            x-axis-label="Temperature (K)" y-axis-label="Dissolved CO2 (mol/kg)"
+            :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']" />
+        </div>
+
+                <!-- <div class="plot-wrapper">
           <Plot :data="store.simulationOutput.solubilityTrapping.plotDataTemperature"
             :emphasis="[store.simulationInput.temperature, store.simulationOutput.solubilityTrapping.trapped_co2]"
             x-axis-label="Temperature (K)" y-axis-label="Dissolved CO2 (mol/kg)"
             :tooltip-labels="['Temperature (K)', 'Dissolved CO2 (mol/kg)']" />
-        </div>
+        </div> -->
       </el-col>
 
       <el-col :span="12" class="scrollable-column">

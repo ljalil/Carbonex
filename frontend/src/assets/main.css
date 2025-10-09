@@ -5,6 +5,7 @@ html, body, *, button, .el-button, .el-button--primary , .el-select-dropdown__it
   font-family: 'Roboto' !important;
 }
 
+
 #app {
   max-width: none; /* Remove width constraint */
   margin: 0;
