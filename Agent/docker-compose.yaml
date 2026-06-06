@@ -1,0 +1,21 @@
+# docker-compose.yaml — local development only
+#
+# Usage:
+#   docker compose up --build     # first run or after requirements.txt changes
+#   docker compose up             # subsequent runs
+#
+# Your local files are mounted into the container, so edits are reflected
+# immediately. Chainlit's -w flag watches for changes and hot-reloads.
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # :Z relabels the mount for SELinux (required on Fedora/RHEL)
+      - .:/home/appuser/app:Z
+    env_file:
+      - .env
+    command: chainlit run main.py -w --host 0.0.0.0 --port 8000

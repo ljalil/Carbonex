@@ -1,0 +1,20 @@
+Simulate CO2 injection into a carbonate-rich formation composed of calcite, quartz, and illite at 100 bar and 80°C, then compute the seismic response before and after injection and estimate the expected 4D impedance contrast.
+
+Use the following reservoir properties and assumptions:
+
+* Initial mineralogy (weight fractions): {"calcite": 0.80, "quartz": 0.20}
+* Initial porosity: 0.18
+* Brine composition (mol/kg water): {"Na+": 0.8, "Cl-": 0.8, "Ca2+": 0.02, "Mg2+": 0.01, "HCO3-": 0.01}
+* Salinity: 35000 ppm
+* Pore aspect ratio: 0.3
+* Initial reservoir fluid: fully brine saturated (baseline CO2 saturation = 0)
+* Monitor state CO2 saturation after injection: 0.50
+* Pressure and temperature remain at 100 bar and 80°C during monitoring
+
+Perform reactive geochemical simulation of CO2-brine-rock interactions, including mineral dissolution/precipitation effects (especially calcite and aluminosilicates if relevant), update porosity/mineralogy, then compute elastic properties and seismic response before and after injection. Report:
+
+1. Mineralogical and porosity changes
+2. Fluid substitution effects
+3. P-wave velocity, S-wave velocity, density, and acoustic impedance before and after injection
+4. Expected 4D impedance contrast (ΔAI and % change)
+5. Main controlling mechanisms behind the impedance change (fluid substitution vs geochemical alteration)

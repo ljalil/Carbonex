@@ -1,0 +1,23 @@
+# docker-compose.yaml (for local development ONLY)
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    
+    # Mount local code into the container for live-reloading.
+    volumes:
+      - ./backend:/home/appuser/app:Z
+
+    # --- DEVELOPMENT OVERRIDES ---
+    # These settings override the production defaults set in the Dockerfile.
+    environment:
+      # Set the environment to development mode.
+      # This enables the debugger and reloader.
+      - FLASK_ENV=development
+
+    # Override the Dockerfile's CMD to use Flask's development server.
+    # The 'flask run' command has a better reloader than 'python app.py'.
+    # '--host=0.0.0.0' is required to make the server accessible from your machine.
+    command: python -m flask run --host=0.0.0.0 --port=5000

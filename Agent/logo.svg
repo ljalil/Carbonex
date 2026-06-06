@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.0482005"
+     inkscape:cx="257.1073"
+     inkscape:cy="577.17966"
+     inkscape:window-width="1536"
+     inkscape:window-height="795"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient5"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#71c3d8;stop-opacity:1;"
+         offset="0"
+         id="stop5" />
+      <stop
+         style="stop-color:#309ebb;stop-opacity:1;"
+         offset="1"
+         id="stop6" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5"
+       id="radialGradient6"
+       cx="61.330139"
+       cy="149.4904"
+       fx="61.330139"
+       fy="149.4904"
+       r="12.984826"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.90966836,0,0,0.90966836,7.5920593,13.419222)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5"
+       id="radialGradient6-9"
+       cx="61.330139"
+       cy="149.4904"
+       fx="61.330139"
+       fy="149.4904"
+       r="12.984826"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.90966836,0,0,0.90966836,13.684552,73.861918)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5"
+       id="radialGradient6-7"
+       cx="61.330139"
+       cy="149.4904"
+       fx="61.330139"
+       fy="149.4904"
+       r="12.984826"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.90966836,0,0,0.90966836,6.6689014,-36.343518)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46667px;font-family:FreeSerif;-inkscape-font-specification:FreeSerif;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#309ebb;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       x="139.35455"
+       y="139.44244"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-size:8.46667px;fill:#309ebb;fill-opacity:1;stroke-width:0.5"
+         x="139.35455"
+         y="139.44244">Agent</tspan></text>
+    <circle
+       style="fill:url(#radialGradient6);fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       id="path2"
+       cx="62.348877"
+       cy="146.1913"
+       r="11.811885" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.4px;font-family:Serif;-inkscape-font-specification:Serif;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#3bd5f1;fill-rule:evenodd;stroke:#ff8080;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       x="101.25884"
+       y="154.68761"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.4px;font-family:FreeSerif;-inkscape-font-specification:FreeSerif;fill:#333333;stroke:none;stroke-width:0.5"
+         x="101.25884"
+         y="154.68761"><tspan
+   style="fill:#ffffff"
+   id="tspan6">C</tspan>arbonex</tspan></text>
+    <circle
+       style="fill:url(#radialGradient6-7);fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       id="path2-3"
+       cx="61.42572"
+       cy="96.428566"
+       r="11.811885"
+       inkscape:export-filename="public/favicon.png"
+       inkscape:export-xdpi="150"
+       inkscape:export-ydpi="150" />
+    <rect
+       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       id="rect6"
+       width="152.0697"
+       height="76.391823"
+       x="-154.76553"
+       y="183.98492"
+       rx="0"
+       ry="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46667px;font-family:FreeSerif;-inkscape-font-specification:FreeSerif;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#6ec2d7;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       x="145.44705"
+       y="199.88513"
+       id="text2-1"><tspan
+         sodipodi:role="line"
+         id="tspan2-7"
+         style="font-size:8.46667px;fill:#6ec2d7;fill-opacity:1;stroke-width:0.5"
+         x="145.44705"
+         y="199.88513">Agent</tspan></text>
+    <circle
+       style="fill:url(#radialGradient6-9);fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       id="path2-7"
+       cx="68.441368"
+       cy="206.63399"
+       r="11.811885" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.4px;font-family:Serif;-inkscape-font-specification:Serif;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#3bd5f1;fill-rule:evenodd;stroke:#ff8080;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       x="107.35133"
+       y="215.13029"
+       id="text1-1"><tspan
+         sodipodi:role="line"
+         id="tspan1-1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.4px;font-family:FreeSerif;-inkscape-font-specification:FreeSerif;fill:#ffffff;stroke:none;stroke-width:0.5"
+         x="107.35133"
+         y="215.13029">Carbonex</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.4px;font-family:Serif;-inkscape-font-specification:Serif;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#3bd5f1;fill-rule:evenodd;stroke:#ff8080;stroke-width:0.499999;stroke-linecap:round;paint-order:markers fill stroke"
+       x="60.518097"
+       y="104.92487"
+       id="text8"><tspan
+         sodipodi:role="line"
+         id="tspan8"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.4px;font-family:FreeSerif;-inkscape-font-specification:FreeSerif;fill:#333333;stroke:none;stroke-width:0.5"
+         x="60.518097"
+         y="104.92487"><tspan
+           style="fill:#ffffff"
+           id="tspan7">C</tspan></tspan></text>
+  </g>
+</svg>
