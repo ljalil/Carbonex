@@ -1,0 +1,39 @@
+DATABASE __DATABASE__
+
+SOLUTION 1
+    temp        __TEMPERATURE__
+    pressure    __PRESSURE_ATM__
+    units       mol/kgw
+    Na          __NA__
+    Cl          __CL__
+    K           __K__
+    Mg          __MG__
+    Ca          __CA__
+    S(6)        __SO4__
+    C(4)        __HCO3__
+    -water      __WATER_MASS__
+
+GAS_PHASE 1
+    -fixed_pressure
+    -pressure   __PRESSURE_ATM__
+    -volume     1.0
+    CO2(g)      __P_CO2__
+    H2O(g)      __P_H2O__
+
+EQUILIBRIUM_PHASES 1
+__MINERAL_PHASES__
+
+USER_PUNCH
+    -headings SOL_DENSITY Salinity_ppm
+    -start
+    10 PUNCH RHO
+    20 Sal = TOT("Na")*22.9898*1000 + TOT("Cl")*35.453*1000 + TOT("Ca")*40.08*1000 + TOT("Mg")*24.312*1000 + TOT("K")*39.102*1000 + TOT("S(6)")*96*1000
+    30 PUNCH Sal
+    -end
+
+SELECTED_OUTPUT
+    -file       __OUTPUT_FILE__
+    -ph         true
+    -totals     Na Cl Mg Ca K S(6) C(4)
+    -equilibrium_phases __SELECTED_MINERALS__
+END

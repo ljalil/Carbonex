@@ -1,0 +1,48 @@
+DATABASE __DATABASE__
+
+SOLUTION 1
+	temp	__TEMPERATURE__
+	pH	7.0
+	units	mol/kgw
+	Na	__NA__
+	Cl	__CL__
+	Ca	__CA__
+	Mg	__MG__
+	K	__K__
+	S(6)	__SO4__
+	C __HCO3__ as HCO3
+
+GAS_PHASE 1
+	-fixed_pressure
+	-pressure __PRESSURE_ATM__
+	-volume 1.0
+	CO2(g) __P_CO2__
+	H2O(g) __P_H2O__
+
+USER_PUNCH
+    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 SOL_DENSITY OSMOTIC PR_CO2 PHI_CO2
+    -start
+    10 PUNCH VM("Na+")
+    20 PUNCH VM("Cl-")
+    30 PUNCH VM("K+")
+    40 PUNCH VM("Ca+2")
+    50 PUNCH VM("Mg+2")
+    60 PUNCH VM("SO4-2")
+    70 PUNCH VM("HCO3-")
+    80 PUNCH VM("CO3-2")
+    90 PUNCH RHO
+    100 PUNCH OSMOTIC
+    110 PUNCH PR_P("CO2(g)")
+    120 PUNCH PR_PHI("CO2(g)")
+    -end
+
+SELECTED_OUTPUT
+    -file __OUTPUT_FILE__
+    -totals C(4)
+    -solution True
+    -gases CO2(g)
+    -saturation_indices CO2(g)
+    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
+    -ionic_strength True
+    -calculate_values
+END

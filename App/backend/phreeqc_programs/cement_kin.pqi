@@ -1,0 +1,78 @@
+DATABASE /home/jalil/Downloads/Cemdata 032022/CEMDATA18-31-03-2022-phaseVol.dat
+
+TITLE sim
+
+SOLUTION 1
+    temp      45
+    pH        7 charge
+    pe        4
+    redox     pe
+    units     mol/kgw
+    pressure  100
+    Ca        0
+    Si        0
+    Al        0
+    S         0
+    C         0
+
+GAS_PHASE 1
+    -fixed_volume
+    -volume     1.0
+    -pressure    100
+    CO2(g)       95
+
+KINETICS 1
+    Portlandite
+        -m0 1
+    CSHQ-JenH
+        -m0 1
+    ettringite
+        -m0 0.0
+    Calcite
+        -m0 0.0
+    -steps 86400 in 100 steps
+
+RATES
+    Portlandite
+        -start
+10 k = 1e-5
+20 si_val = SI("Portlandite")
+30 omega = 10^si_val
+40 moles = k * (1 - omega) * TIME
+50 SAVE moles
+        -end
+
+    CSHQ-JenH
+        -start
+10 k = 1e-5
+20 si_val = SI("CSHQ-JenH")
+30 omega = 10^si_val
+40 moles = k * (1 - omega) * TIME
+50 SAVE moles
+        -end
+
+    ettringite
+        -start
+10 k = 1e-5
+20 si_val = SI("ettringite")
+30 omega = 10^si_val
+40 moles = k * (1 - omega) * TIME
+50 SAVE moles
+        -end
+
+    Calcite
+        -start
+10 k = 1e-5
+20 si_val = SI("Calcite")
+30 omega = 10^si_val
+40 moles = k * (1 - omega) * TIME
+50 SAVE moles
+        -end
+
+SELECTED_OUTPUT
+    -reset false
+    -time true
+    -pH true
+    -totals Ca Si Al S C
+    -kinetic_reactants Portlandite CSHQ-JenH ettringite Calcite
+    -saturation_indices Portlandite CSHQ-JenH ettringite Calcite

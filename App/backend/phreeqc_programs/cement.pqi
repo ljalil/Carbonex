@@ -1,0 +1,31 @@
+DATABASE /home/jalil/Downloads/Cemdata 032022/CEMDATA18-31-03-2022-phaseVol.dat
+
+TITLE sim
+
+SOLUTION 1
+    temp      45
+    pH        12 charge
+    pe        4
+    redox     pe
+    units     mol/kgw
+    pressure  10
+
+
+GAS_PHASE 1
+    -fixed_volume
+    -volume     1.0
+    -pressure    10
+    CO2(g)       1
+    H2O(g)     9
+
+EQUILIBRIUM_PHASES 1
+    Portlandite 0   2
+    CSHQ-JenH   0   2.99
+    ettringite  0   0.04
+    Cal 0   0
+
+
+SELECTED_OUTPUT
+    -reset false
+    -pH true
+    -saturation_indices Portlandite CSHQ-JenH ettringite Cal
