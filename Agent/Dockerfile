@@ -39,6 +39,4 @@ COPY --chown=appuser:appuser . .
 
 EXPOSE 8000
 
-# Carbonex Agent is meant to be deployed to carbonex.jalil.lat/agent, so root-path needs to be set
-# CMD ["chainlit", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
-CMD ["chainlit", "run", "main.py", "--host", "0.0.0.0", "--port", "8000", "--root-path", "/agent"]
+CMD ["chainlit", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
