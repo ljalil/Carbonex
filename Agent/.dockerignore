@@ -1,0 +1,17 @@
+# Never bake the API key into the image — injected at runtime via docker-compose env_file
+.env
+
+# Local virtualenv — packages are installed inside the image
+.venv/
+
+# Python bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Version control
+.git/
+
+# Editor / OS artifacts
+.DS_Store
+*.swp

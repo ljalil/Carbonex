@@ -46,3 +46,6 @@ docs/_build/
 *.pqo
 *.tsv
 *.inp
+.env
+
+
