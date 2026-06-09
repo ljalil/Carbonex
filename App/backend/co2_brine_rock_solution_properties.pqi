@@ -1,0 +1,68 @@
+DATABASE /usr/local/share/doc/phreeqc/database/phreeqc.dat
+
+SOLUTION 1
+    temp    39.05000000000001
+    units mol/kgw
+    Na  0.469
+    Cl  0.546
+    Ca  0.0103
+    K   0.0102
+    Mg  0.0528
+    S(6) 0.0282
+    C(4) 0
+
+GAS_PHASE 1
+	-fixed_pressure
+	-pressure 118.2333754
+	-volume 1.0
+	CO2(g) 112.32170663
+	H2O(g) 5.91166877
+
+EQUILIBRIUM_PHASES 1
+    Quartz        0   7.899072949087096
+    Calcite        0   0
+    Siderite        0   0.29520932239965475
+    Dolomite        0   0.12039045553145336
+    Illite        0   0.7887707402270508
+    Kaolinite        0   0.4659900836690424
+    K-feldspar        0   0.0697014335501024
+    Albite        0   0
+    Chlorite(14A)        0   0
+    Pyrite        0   0.18503083847307883
+
+USER_PUNCH
+    -headings VM_Na+ VM_Cl- VM_K+ VM_Ca+2 VM_Mg+2 VM_SO4-2 VM_HCO3- VM_CO3-2 EQUI_QUARTZ EQUI_CALCITE EQUI_SIDERITE EQUI_DOLOMITE EQUI_ILLITE EQUI_KAOLINITE EQUI_KFELDSPAR EQUI_ALBITE EQUI_CHLORITE SOL_DENSITY OSMOTIC PR_CO2 PHI_CO2
+    -start
+    10 PUNCH VM("Na+")
+    20 PUNCH VM("Cl-")
+    30 PUNCH VM("K+")
+    40 PUNCH VM("Ca+2")
+    50 PUNCH VM("Mg+2")
+    60 PUNCH VM("SO4-2")
+    70 PUNCH VM("HCO3-")
+    80 PUNCH VM("CO3-2")
+    90 PUNCH EQUI("Quartz")
+    100 PUNCH EQUI("Calcite")
+    110 PUNCH EQUI("Siderite")
+    120 PUNCH EQUI("Dolomite")
+    130 PUNCH EQUI("Illite")
+    140 PUNCH EQUI("Kaolinite")
+    150 PUNCH EQUI("K-feldspar")
+    160 PUNCH EQUI("Albite")
+    170 PUNCH EQUI("Chlorite(14A)")
+    180 PUNCH RHO
+    190 PUNCH OSMOTIC
+    200 PUNCH PR_P("CO2(g)")
+    210 PUNCH PR_PHI("CO2(g)")
+    -end
+
+SELECTED_OUTPUT
+    -file ./co2_brine_rock_solution_properties.tsv
+    -totals C(4)
+    -solution True
+    -gases CO2(g)
+    -saturation_indices CO2(g)
+    -activities   Na+ K+ Cl- SO4-2 Ca+2 Mg+2 HCO3- CO3-2
+    -ionic_strength True
+    -calculate_values
+END

@@ -1,0 +1,29 @@
+DATABASE /usr/local/share/doc/phreeqc/database/phreeqc.dat
+
+SOLUTION 1
+	temperature	37.05000000000001
+	units	mol/kgw
+	Na	0.469
+	Cl	0.546
+	Ca	0.0103
+	Mg	0.0528
+	K	0.0102
+	S(6)	0.0282
+
+GAS_PHASE 1
+	-fixed_volume
+	CO2(g)	0
+	H2O(g)	0
+
+REACTION 1
+	CO2 1;	  0 100*0.5
+
+INCREMENTAL_REACTIONS true
+
+SELECTED_OUTPUT
+	-file ./varying_pressure.tsv
+	-totals	C(4)
+	-solution True
+	-gases	CO2(g)
+	-saturation_indices CO2(g)
+END
